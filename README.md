@@ -4,17 +4,17 @@
 
 * 使用
 ```
-	allprojects {
-		repositories {
-			...
-			maven { url 'https://www.jitpack.io' }
-		}
+allprojects {
+	repositories {
+		...
+		maven { url 'https://www.jitpack.io' }
 	}
+}
 ```
 ```
 dependencies {
-	        implementation 'com.github.Colaman0:StatusLayout:1.0.0'
-	}
+	implementation 'com.github.Colaman0:StatusLayout:1.0.0'
+}
 ```
 
 * 示例
