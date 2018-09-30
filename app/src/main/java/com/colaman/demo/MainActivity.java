@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_loading).setOnClickListener(mMyClickListener);
         findViewById(R.id.btn_empty).setOnClickListener(mMyClickListener);
         findViewById(R.id.btn_error).setOnClickListener(mMyClickListener);
+        findViewById(R.id.btn_normal).setOnClickListener(mMyClickListener);
         mStatusLayout = findViewById(R.id.status_layout);
         initStatusLayout();
     }
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
                 .add(ERROR, R.layout.include_error)
                 .setInAnimation(R.anim.anim_in)
                 .setOutAnimation(R.anim.anim_out)
+                .setDefaultAnimation()
                 .setLayoutClickListener(new StatusLayout.OnLayoutClickListener() {
                     @Override
                     public void OnLayoutClick(View view, String status) {
