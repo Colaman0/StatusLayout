@@ -40,5 +40,13 @@
     <com.colaman.statuslayout.StatusLayout
         android:id="@+id/status_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorPrimaryDark"
+            android:text="dsafasdfsadfasdf asd"
+            android:textColor="#fff" />
+    </com.colaman.statuslayout.StatusLayout>
 </LinearLayout>

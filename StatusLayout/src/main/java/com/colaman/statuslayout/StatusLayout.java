@@ -1,186 +1,112 @@
 package com.colaman.statuslayout;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.support.annotation.LayoutRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewStub;
-import android.widget.FrameLayout;
+import android.widget.ViewAnimator;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.example.statuslayout.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Create by kyle on 2018/9/28
- * Function : 对不同状态的布局进行管理
+ * Create by kyle on 2018/9/30
+ * Function : 管理不同状态下布局显示
  */
-public class StatusLayout extends FrameLayout {
-    public static final String STATUS_NORMAL = "status_normal";
-    private Map<String, View> mLayoutMap = new HashMap<>();
-    // 最后一个显示的布局
-    private View mLastShowView;
+public class StatusLayout extends ViewAnimator {
+    private List<String> mStatusList = new ArrayList<>();
     private Context mContext;
-    private long mAnimationDuration = 300;
-    private boolean mHaveAnimation = true;
-    // 当有动画效果的时候需要标记一下是否正在动画效果中，避免快速切换导致view不显示的bug
-    private boolean mIsChanging = false;
-    private String mShowType = STATUS_NORMAL;
+    private LayoutInflater mLayoutInflater;
+    private int mCurrentPosition = 0;
 
-    public StatusLayout(@NonNull Context context) {
+    public StatusLayout(Context context) {
         this(context, null);
     }
 
-    public StatusLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public StatusLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+    public StatusLayout(Context context, AttributeSet attrs) {
+        super(context, attrs);
         mContext = context;
+        mLayoutInflater = LayoutInflater.from(mContext);
     }
 
     /**
-     * 加载默认的内容布局
+     * 添加一种布局
      *
-     * @param context
-     * @param layoutRes
+     * @param layoutRes 布局资源文件
+     * @param status    布局所代表的状态
      * @return
      */
-    public StatusLayout defaultInit(Context context, @LayoutRes int layoutRes) {
-        View contentView = LayoutInflater.from(context).inflate(layoutRes, this, false);
-        mLayoutMap.put(STATUS_NORMAL, contentView);
-        mLastShowView = contentView;
-        addView(contentView);
+    public StatusLayout add(String status, @LayoutRes int layoutRes) {
+        addView(mLayoutInflater.inflate(layoutRes, this, false));
+        mStatusList.add(status);
         return this;
     }
 
     /**
-     * 设置切换布局的时候是否使用动画
+     * 切换布局，根据status的值来切换相对应类型的布局
      *
-     * @param need
+     * @param status 布局所代表的状态
+     */
+    public void switchLayout(String status) {
+        int index = mStatusList.indexOf(status);
+        if (index < 0 || index + 1 == mCurrentPosition) {
+            return;
+        }
+        setDisplayedChild(index + 1);
+        mCurrentPosition = index + 1;
+    }
+
+    /**
+     * 切换到默认的内容，即布局资源文件中添加的内容
+     */
+    public void showDefaultContent() {
+        if (mCurrentPosition == 0) {
+            return;
+        }
+        setDisplayedChild(0);
+        mCurrentPosition = 0;
+    }
+
+    /**
+     * 显示布局时的动画效果
+     *
+     * @param animationRes 动画资源文件
      * @return
      */
-    public StatusLayout needAnimation(boolean need) {
-        mHaveAnimation = need;
+    public StatusLayout setInAnimation(int animationRes) {
+        setInAnimation(mContext, animationRes);
         return this;
     }
 
     /**
-     * 添加一个新的布局
+     * 隐藏布局时的动画效果
      *
-     * @param layoutType     布局的类型，一般定义成常量
-     * @param layoutRes      布局layout资源
-     * @param isDelayInflate 是否延迟加载，一般像error/empty/networkError这种比较少可能会加载到的布局文件可以设成true
+     * @param animationRes 动画资源文件
      * @return
      */
-    public StatusLayout add(String layoutType, @LayoutRes int layoutRes, boolean isDelayInflate) {
-        if (isDelayInflate) {
-            ViewStub viewStub = new ViewStub(mContext, layoutRes);
-            add(layoutType, viewStub);
-        } else {
-            add(layoutType, LayoutInflater.from(mContext).inflate(layoutRes, this, false));
-        }
+    public StatusLayout setOutAnimation(int animationRes) {
+        setOutAnimation(mContext, animationRes);
         return this;
     }
 
     /**
-     * 添加一个新的布局
+     * 设置默认的的动画效果
      *
-     * @param layoutType 布局的类型，一般定义成常量
-     * @param layoutView 布局view
      * @return
      */
-    public StatusLayout add(String layoutType, View layoutView) {
-        layoutView.setVisibility(View.GONE);
-        mLayoutMap.put(layoutType, layoutView);
-        if (layoutView.getParent() != null) {
-            ((ViewGroup) layoutView.getParent()).removeView(layoutView);
-        }
-        addView(layoutView);
+    public StatusLayout setDefaultAnimation() {
+        setInAnimation(R.anim.anim_in);
+        setOutAnimation(R.anim.anim_out);
         return this;
     }
 
     /**
-     * 切换布局
-     *
-     * @param layoutType 需要显示的布局类型，根据add的时候传入的类型来切换
+     * 获取当前显示了第几个布局，按add顺序来排序
+     * @return
      */
-    public void switchLayout(String layoutType) {
-        View view = mLayoutMap.get(layoutType);
-        if (view != null && mShowType != layoutType && !mIsChanging) {
-            mIsChanging = true;
-            mShowType = layoutType;
-            if (view instanceof ViewStub) {
-                view = ((ViewStub) view).inflate();
-                mLayoutMap.put(layoutType, view);
-            }
-            // 隐藏上一个显示的view，并且把mLastShowView改成当前显示的view
-            if (mLastShowView != null) {
-                goneView(mLastShowView);
-                mLastShowView = view;
-            }
-            // 把需要显示的view显示出来
-            visibleView(view);
-        }
-    }
-
-    /**
-     * 显示view
-     *
-     * @param view
-     */
-    private void visibleView(final View view) {
-        if (mHaveAnimation) {
-            view.setAlpha(0f);
-            view.setVisibility(View.VISIBLE);
-            view.animate()
-                    .alpha(1f)
-                    .setDuration(mAnimationDuration)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            super.onAnimationEnd(animation);
-                            mIsChanging = false;
-                        }
-                    });
-        } else {
-            view.setVisibility(View.VISIBLE);
-        }
-    }
-
-    /**
-     * 隐藏view
-     *
-     * @param view
-     */
-    private void goneView(final View view) {
-        if (mHaveAnimation) {
-            view.animate().alpha(0f)
-                    .setDuration(mAnimationDuration)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            super.onAnimationEnd(animation);
-                            view.setVisibility(GONE);
-                            mIsChanging = false;
-                        }
-                    });
-        } else {
-            view.setVisibility(GONE);
-        }
-    }
-
-    /**
-     * 设置动画时间持续时长
-     * @param animationDuration
-     */
-    public void setAnimationDuration(long animationDuration) {
-        mAnimationDuration = animationDuration;
+    public int getCurrentPosition() {
+        return mCurrentPosition;
     }
 }

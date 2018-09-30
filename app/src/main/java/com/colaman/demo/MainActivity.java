@@ -11,6 +11,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String LOADING = "loading";
     public static final String ERROR = "error";
     public static final String EMPTY = "empty";
+    public static final String NORMAL = "normal";
     private MyClickListener mMyClickListener;
     private StatusLayout mStatusLayout;
 
@@ -28,12 +29,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initStatusLayout() {
-        mStatusLayout.defaultInit(this, R.layout.include_normal)
+        mStatusLayout
                 //add()方法第一个参数是布局对应的标记，第二个参数是布局资源，第三个参数是表示需不需要延迟加载，true:会用viewstub包装，false:默认的方法
-                .add(LOADING, R.layout.include_loading, true)
-                .add(EMPTY, R.layout.include_empty, false)
-                .add(ERROR, R.layout.include_error, false)
-                .needAnimation(true);
+                .add(LOADING, R.layout.include_loading)
+                .add(EMPTY, R.layout.include_empty)
+                .add(ERROR, R.layout.include_error)
+                .setInAnimation(R.anim.anim_in)
+                .setOutAnimation(R.anim.anim_out);
     }
 
     private class MyClickListener implements View.OnClickListener {
@@ -45,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
                     mStatusLayout.switchLayout(LOADING);
                     break;
                 case R.id.btn_normal:
-                    mStatusLayout.switchLayout(StatusLayout.STATUS_NORMAL);
+                    mStatusLayout.showDefaultContent();
                     break;
                 case R.id.btn_empty:
                     // 这里的tag是你在add的时候传的标记，如果要切换原本默认显示的内容(也就是defaultInit里的布局)则传入StatusLayout.STATUS_NORMAL
