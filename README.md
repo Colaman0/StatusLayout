@@ -13,7 +13,7 @@ allprojects {
 ```
 ```
 dependencies {
-	implementation 'com.github.Colaman0:StatusLayout:1.0.0'
+	implementation 'com.github.Colaman0:StatusLayout:1.0.2'
 }
 ```
 
@@ -24,22 +24,43 @@ dependencies {
  <com.colaman.statuslayout.StatusLayout
         android:id="@+id/status_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent" >
+       //这里可以实现你想要实现的页面
+ </com.colaman.statuslayout.StatusLayout>
 ```
 ##### 
  ```
- //defaultInit()方法里传入默认显示的布局，也就是你的内容部分
-mStatusLayout.defaultInit(this, R.layout.include_normal)
-                //add()方法第一个参数是布局对应的标记，第二个参数是布局资源，第三个参数是表示需不需要延迟加载，true:会用viewstub包装，false:默认的方法
-                .add(LOADING, R.layout.include_loading, true)
-                .add(EMPTY, R.layout.include_empty, false)
-                .add(ERROR, R.layout.include_error, false)
-                .needAnimation(true);
+// LOADING的add方法里多加了一个id，这样点击事件的触发就是该id的view而不是默认的整个布局
+mStatusLayout.add(LOADING, R.layout.include_loading, R.id.tv_loading)
+            .add(EMPTY, R.layout.include_empty)
+            .add(ERROR, R.layout.include_error)
+            // 这里可以设置显示的动画以及隐藏的动画
+            .setInAnimation(R.anim.anim_in)
+            .setOutAnimation(R.anim.anim_out)
+            // 也可以直接用默认的透明度变化的动画
+            .setDefaultAnimation()
+            .setLayoutClickListener(new StatusLayout.OnLayoutClickListener() {
+                @Override
+                public void OnLayoutClick(View view, String status) {
+                    // 这里的view就是add的时候传入的 控件id/整个layout,status就是你上面add的时候传入的status
+                    switch (status) {
+                        case LOADING:
+                            ((TextView) view.findViewById(R.id.tv_loading)).setText("load complete");
+                            break;
+                        case EMPTY:
+                            Toast.makeText(MainActivity.this, EMPTY, Toast.LENGTH_SHORT).show();
+                            break;
+                        case ERROR:
+                            Toast.makeText(MainActivity.this, ERROR, Toast.LENGTH_SHORT).show();
+                            break;
+                    }
+                }
+            });
 ```
 ##### 当你需要切换布局的时候:
 ```
-// 这里的tag是你在add的时候传的标记，如果要切换原本默认显示的内容(也就是defaultInit里的布局)则传入StatusLayout.STATUS_NORMAL
- mStatusLayout.switchLayout(tag);
+// 这里的tag是你在add的时候传的标记，如果要切换原本的布局则调用showDefaultContent()方法
+ mStatusLayout.switchLayout(tag); / mStatusLayout.showDefaultContent();
 ```
 
 
