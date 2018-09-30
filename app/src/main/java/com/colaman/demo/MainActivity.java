@@ -3,6 +3,8 @@ package com.colaman.demo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.colaman.statuslayout.StatusLayout;
 import com.example.gg.statuslayout.R;
@@ -21,7 +23,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mMyClickListener = new MyClickListener();
         findViewById(R.id.btn_loading).setOnClickListener(mMyClickListener);
-        findViewById(R.id.btn_normal).setOnClickListener(mMyClickListener);
         findViewById(R.id.btn_empty).setOnClickListener(mMyClickListener);
         findViewById(R.id.btn_error).setOnClickListener(mMyClickListener);
         mStatusLayout = findViewById(R.id.status_layout);
@@ -30,12 +31,27 @@ public class MainActivity extends AppCompatActivity {
 
     private void initStatusLayout() {
         mStatusLayout
-                //add()方法第一个参数是布局对应的标记，第二个参数是布局资源，第三个参数是表示需不需要延迟加载，true:会用viewstub包装，false:默认的方法
-                .add(LOADING, R.layout.include_loading)
+                .add(LOADING, R.layout.include_loading, R.id.tv_loading)
                 .add(EMPTY, R.layout.include_empty)
                 .add(ERROR, R.layout.include_error)
                 .setInAnimation(R.anim.anim_in)
-                .setOutAnimation(R.anim.anim_out);
+                .setOutAnimation(R.anim.anim_out)
+                .setLayoutClickListener(new StatusLayout.OnLayoutClickListener() {
+                    @Override
+                    public void OnLayoutClick(View view, String status) {
+                        switch (status) {
+                            case LOADING:
+                                ((TextView) view.findViewById(R.id.tv_loading)).setText("load complete");
+                                break;
+                            case EMPTY:
+                                Toast.makeText(MainActivity.this, EMPTY, Toast.LENGTH_SHORT).show();
+                                break;
+                            case ERROR:
+                                Toast.makeText(MainActivity.this, ERROR, Toast.LENGTH_SHORT).show();
+                                break;
+                        }
+                    }
+                });
     }
 
     private class MyClickListener implements View.OnClickListener {

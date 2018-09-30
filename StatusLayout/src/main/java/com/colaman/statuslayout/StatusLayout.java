@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.LayoutRes;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.ViewAnimator;
 
 import com.example.statuslayout.R;
@@ -19,6 +20,7 @@ public class StatusLayout extends ViewAnimator {
     private List<String> mStatusList = new ArrayList<>();
     private Context mContext;
     private LayoutInflater mLayoutInflater;
+    private OnLayoutClickListener mOnLayoutClickListener;
     private int mCurrentPosition = 0;
 
     public StatusLayout(Context context) {
@@ -32,14 +34,36 @@ public class StatusLayout extends ViewAnimator {
     }
 
     /**
-     * 添加一种布局
+     * 添加一种布局,默认点击整个view回调LayoutClickListener
      *
      * @param layoutRes 布局资源文件
      * @param status    布局所代表的状态
      * @return
      */
     public StatusLayout add(String status, @LayoutRes int layoutRes) {
-        addView(mLayoutInflater.inflate(layoutRes, this, false));
+        add(status, layoutRes, 0);
+        return this;
+    }
+
+    /**
+     * 添加一种布局,点击clickRes的view才回调，有的布局类似错误重试是点击一个按钮才触发，就多传一个按钮的id。
+     *
+     * @param status    布局资源文件
+     * @param layoutRes 布局资源文件
+     * @param clickRes  需要监听的某个view的id
+     * @return
+     */
+    public StatusLayout add(String status, @LayoutRes int layoutRes, int clickRes) {
+        View view = mLayoutInflater.inflate(layoutRes, this, false);
+        if (view == null) {
+            throw new NullPointerException("layoutRes can't be converted to view ，please check the layoutRes");
+        }
+        View clickView = view.findViewById(clickRes);
+        if (clickView == null) {
+            clickView = view;
+        }
+        clickView.setOnClickListener(getClickListener(view, status));
+        addView(view);
         mStatusList.add(status);
         return this;
     }
@@ -104,9 +128,49 @@ public class StatusLayout extends ViewAnimator {
 
     /**
      * 获取当前显示了第几个布局，按add顺序来排序
+     *
      * @return
      */
     public int getCurrentPosition() {
         return mCurrentPosition;
+    }
+
+    /**
+     * get一个点击监听
+     *
+     * @param status 传入监听布局的status
+     * @return
+     */
+    public OnClickListener getClickListener(final View view, final String status) {
+        return new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mOnLayoutClickListener != null) {
+                    mOnLayoutClickListener.OnLayoutClick(view, status);
+                }
+            }
+        };
+    }
+
+    /**
+     * 设置布局点击的监听
+     *
+     * @param onLayoutClickListener
+     */
+    public void setLayoutClickListener(OnLayoutClickListener onLayoutClickListener) {
+        mOnLayoutClickListener = onLayoutClickListener;
+    }
+
+    /**
+     * 布局点击事件的接口
+     */
+    public interface OnLayoutClickListener {
+        /**
+         * 布局点击之后的回调方法
+         *
+         * @param view   add的时候传入的资源文件转换的view，要在回调中做操作可以通过操作view来实现
+         * @param status 当前点击的布局代表的status
+         */
+        void OnLayoutClick(View view, String status);
     }
 }
