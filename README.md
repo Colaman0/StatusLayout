@@ -30,32 +30,33 @@ dependencies {
 ```
 ##### 
  ```
-// LOADING的add方法里多加了一个id，这样点击事件的触发就是该id的view而不是默认的整个布局
-mStatusLayout.add(LOADING, R.layout.include_loading, R.id.tv_loading)
-            .add(EMPTY, R.layout.include_empty)
-            .add(ERROR, R.layout.include_error)
-            // 这里可以设置显示的动画以及隐藏的动画
-            .setInAnimation(R.anim.anim_in)
-            .setOutAnimation(R.anim.anim_out)
-            // 也可以直接用默认的透明度变化的动画
-            .setDefaultAnimation()
-            .setLayoutClickListener(new StatusLayout.OnLayoutClickListener() {
-                @Override
-                public void OnLayoutClick(View view, String status) {
-                    // 这里的view就是add的时候传入的 控件id/整个layout,status就是你上面add的时候传入的status
-                    switch (status) {
-                        case LOADING:
-                            ((TextView) view.findViewById(R.id.tv_loading)).setText("load complete");
-                            break;
-                        case EMPTY:
-                            Toast.makeText(MainActivity.this, EMPTY, Toast.LENGTH_SHORT).show();
-                            break;
-                        case ERROR:
-                            Toast.makeText(MainActivity.this, ERROR, Toast.LENGTH_SHORT).show();
-                            break;
+// ERROR的add方法里多加了一个id，这样点击事件的触发就是该id的view而不是默认的整个布局
+mStatusLayout
+                .add(LOADING, R.layout.include_loading)
+                .add(EMPTY, R.layout.include_empty)
+                .add(ERROR, R.layout.include_error,R.id.btn_retry)
+		// 可以设置动画效果
+                .setInAnimation(R.anim.anim_in_alpha)
+                .setOutAnimation(R.anim.anim_out_alpha)
+		// 没有特别的需求可以直接使用默认的透明度渐变的动画
+                .setDefaultAnimation()
+                .setLayoutClickListener(new StatusLayout.OnLayoutClickListener() {
+                    @Override
+                    public void OnLayoutClick(View view, String status) {
+                        switch (status) {
+                            case LOADING:
+                                Toast.makeText(MainActivity.this, LOADING, Toast.LENGTH_SHORT).show();
+                                break;
+                            case EMPTY:
+                                Toast.makeText(MainActivity.this, EMPTY, Toast.LENGTH_SHORT).show();
+                                break;
+                            case ERROR:
+			    	// 在上面add的时候ERROR状态传进一个id，这个id的button点击之后显示回正常布局，布局其他地方不会触发
+                                mStatusLayout.showDefaultContent();
+                                break;
+                        }
                     }
-                }
-            });
+                });
 ```
 ##### 当你需要切换布局的时候:
 ```
