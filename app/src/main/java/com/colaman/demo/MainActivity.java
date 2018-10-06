@@ -32,11 +32,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void initStatusLayout() {
         mStatusLayout
-                .add(LOADING, R.layout.include_loading, R.id.tv_loading)
+                .add(LOADING, R.layout.include_loading)
                 .add(EMPTY, R.layout.include_empty)
-                .add(ERROR, R.layout.include_error)
-                .setInAnimation(R.anim.anim_in)
-                .setOutAnimation(R.anim.anim_out)
+                .add(ERROR, R.layout.include_error,R.id.btn_retry)
+                .setInAnimation(R.anim.anim_in_alpha)
+                .setOutAnimation(R.anim.anim_out_alpha)
                 .setDefaultAnimation()
                 .setLayoutClickListener(new StatusLayout.OnLayoutClickListener() {
                     @Override
@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
                                 Toast.makeText(MainActivity.this, EMPTY, Toast.LENGTH_SHORT).show();
                                 break;
                             case ERROR:
-                                Toast.makeText(MainActivity.this, ERROR, Toast.LENGTH_SHORT).show();
+                                mStatusLayout.showDefaultContent();
                                 break;
                         }
                     }

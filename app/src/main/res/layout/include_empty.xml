@@ -8,5 +8,5 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:text="empty"
-        android:textSize="30sp" />
+        android:textSize="20sp" />
 </android.support.constraint.ConstraintLayout>

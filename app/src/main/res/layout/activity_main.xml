@@ -47,6 +47,7 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:text="default content"
-            android:textColor="#000" />
+            android:textColor="#000"
+            android:textSize="20sp" />
     </com.colaman.statuslayout.StatusLayout>
 </LinearLayout>

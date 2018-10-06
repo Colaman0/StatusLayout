@@ -17,6 +17,10 @@ import java.util.List;
  * Function : 管理不同状态下布局显示
  */
 public class StatusLayout extends ViewAnimator {
+    public static final String LOADING = "loading";
+    public static final String EMPTY = "empty";
+    public static final String ERROR = "error";
+
     private List<String> mStatusList = new ArrayList<>();
     private Context mContext;
     private LayoutInflater mLayoutInflater;
@@ -40,7 +44,7 @@ public class StatusLayout extends ViewAnimator {
      * @param status    布局所代表的状态
      * @return
      */
-    public StatusLayout add(String status, @LayoutRes int layoutRes) {
+    public StatusLayout add(String status, @LayoutRes int layoutRes) throws RuntimeException {
         add(status, layoutRes, 0);
         return this;
     }
@@ -53,7 +57,10 @@ public class StatusLayout extends ViewAnimator {
      * @param clickRes  需要监听的某个view的id
      * @return
      */
-    public StatusLayout add(String status, @LayoutRes int layoutRes, int clickRes) {
+    public StatusLayout add(String status, @LayoutRes int layoutRes, int clickRes) throws RuntimeException {
+        if (mStatusList.indexOf(status) >= 0) {
+            throw new RuntimeException("can not add the same status layout");
+        }
         View view = mLayoutInflater.inflate(layoutRes, this, false);
         if (view == null) {
             throw new NullPointerException("layoutRes can't be converted to view ，please check the layoutRes");
@@ -121,8 +128,8 @@ public class StatusLayout extends ViewAnimator {
      * @return
      */
     public StatusLayout setDefaultAnimation() {
-        setInAnimation(R.anim.anim_in);
-        setOutAnimation(R.anim.anim_out);
+        setInAnimation(R.anim.anim_in_alpha);
+        setOutAnimation(R.anim.anim_out_alpha);
         return this;
     }
 
