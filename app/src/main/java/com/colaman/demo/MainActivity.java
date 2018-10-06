@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         mStatusLayout
                 .add(LOADING, R.layout.include_loading)
                 .add(EMPTY, R.layout.include_empty)
-                .add(ERROR, R.layout.include_error,R.id.btn_retry)
+                .add(ERROR, R.layout.include_error, R.id.btn_retry)
                 .setInAnimation(R.anim.anim_in_alpha)
                 .setOutAnimation(R.anim.anim_out_alpha)
                 .setDefaultAnimation()
@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
                     public void OnLayoutClick(View view, String status) {
                         switch (status) {
                             case LOADING:
-                                ((TextView) view.findViewById(R.id.tv_loading)).setText("load complete");
+                                Toast.makeText(MainActivity.this, LOADING, Toast.LENGTH_SHORT).show();
                                 break;
                             case EMPTY:
                                 Toast.makeText(MainActivity.this, EMPTY, Toast.LENGTH_SHORT).show();
