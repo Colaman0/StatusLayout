@@ -32,9 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initStatusLayout() {
         mStatusLayout
-                .add(LOADING, R.layout.include_loading)
-                .add(EMPTY, R.layout.include_empty)
-                .add(ERROR, R.layout.include_error, R.id.btn_retry)
+                .add(StatusLayout.LOADING,R.layout.include_loading)
                 .setInAnimation(R.anim.anim_in_alpha)
                 .setOutAnimation(R.anim.anim_out_alpha)
                 .setDefaultAnimation()

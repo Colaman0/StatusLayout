@@ -3,6 +3,7 @@ package com.colaman.statuslayout;
 import android.content.Context;
 import android.support.annotation.LayoutRes;
 import android.util.AttributeSet;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ViewAnimator;
@@ -21,11 +22,15 @@ public class StatusLayout extends ViewAnimator {
     public static final String EMPTY = "empty";
     public static final String ERROR = "error";
 
-    private List<String> mStatusList = new ArrayList<>();
+    private static List<StatusConfig> mStatusConfigs = new ArrayList<>();
+    private static List<String> mStatusList = new ArrayList<>();
+    private static List<View> mViewList = new ArrayList<>();
     private Context mContext;
     private LayoutInflater mLayoutInflater;
     private OnLayoutClickListener mOnLayoutClickListener;
-    private int mCurrentPosition = 0;
+    private int mCurrentPosition ;
+    private boolean mUseDefault = true;
+    private boolean mInited = false;
 
     public StatusLayout(Context context) {
         this(context, null);
@@ -35,6 +40,40 @@ public class StatusLayout extends ViewAnimator {
         super(context, attrs);
         mContext = context;
         mLayoutInflater = LayoutInflater.from(mContext);
+
+    }
+
+    /**
+     * 加载默认属性
+     */
+    private void initDefault() {
+        for (StatusConfig config : mStatusConfigs) {
+            add(config.getStatus(), config.getLayoutRes(), config.getClickRes());
+        }
+    }
+
+    /**
+     * 设置全局数据
+     *
+     * @param statusConfigs
+     */
+    public static void setGlobalData(List<StatusConfig> statusConfigs) {
+        mStatusConfigs.addAll(statusConfigs);
+    }
+
+    /**
+     * 添加一种布局
+     *
+     * @param config StatusConfig
+     * @return
+     * @throws RuntimeException
+     */
+    public StatusLayout add(StatusConfig config) throws RuntimeException {
+        if (config == null) {
+            throw new NullPointerException("config is null");
+        }
+        add(config.getStatus(), config.getLayoutRes(), config.getClickRes());
+        return this;
     }
 
     /**
@@ -58,8 +97,9 @@ public class StatusLayout extends ViewAnimator {
      * @return
      */
     public StatusLayout add(String status, @LayoutRes int layoutRes, int clickRes) throws RuntimeException {
-        if (mStatusList.indexOf(status) >= 0) {
-            throw new RuntimeException("can not add the same status layout");
+        int index = mStatusList.indexOf(status);
+        if (index >= 0) {
+            removeViewAt(index);
         }
         View view = mLayoutInflater.inflate(layoutRes, this, false);
         if (view == null) {
@@ -72,6 +112,7 @@ public class StatusLayout extends ViewAnimator {
         clickView.setOnClickListener(getClickListener(view, status));
         addView(view);
         mStatusList.add(status);
+        mViewList.add(view);
         return this;
     }
 
@@ -81,6 +122,10 @@ public class StatusLayout extends ViewAnimator {
      * @param status 布局所代表的状态
      */
     public void switchLayout(String status) {
+        if (mUseDefault && !mInited) {
+            initDefault();
+            mInited = true;
+        }
         int index = mStatusList.indexOf(status);
         if (index < 0 || index + 1 == mCurrentPosition) {
             return;
@@ -134,13 +179,26 @@ public class StatusLayout extends ViewAnimator {
     }
 
     /**
-     * 获取当前显示了第几个布局，按add顺序来排序
+     * 获取当前显示了第几个布局
      *
      * @return
      */
     public int getCurrentPosition() {
         return mCurrentPosition;
     }
+
+    public static void initEmpty(@LayoutRes int layoutRes) {
+        mStatusList.add(EMPTY);
+    }
+
+    public static void initError(@LayoutRes int layoutRes) {
+        mStatusList.add(ERROR);
+    }
+
+    public static void initLoading(@LayoutRes int layoutRes) {
+        mStatusList.add(LOADING);
+    }
+
 
     /**
      * get一个点击监听
