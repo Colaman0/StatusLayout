@@ -20,7 +20,6 @@ public class MyApplication extends Application {
         super.onCreate();
         StatusLayout.setGlobalData( Arrays.asList(
                 new StatusConfig(StatusLayout.EMPTY, R.layout.include_empty,0),
-                new StatusConfig(StatusLayout.LOADING, R.layout.include_empty,0),
                 new StatusConfig(StatusLayout.ERROR, R.layout.include_error,R.id.btn_retry)));
     }
 }

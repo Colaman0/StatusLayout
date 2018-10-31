@@ -1,3 +1,4 @@
+
 ### Android template
 # Built application files
 *.apk
@@ -66,9 +67,3 @@ fastlane/screenshots
 fastlane/test_output
 fastlane/readme.md
 
-.idea/sonarlint/
-StatusLayout/libs/
-StatusLayout/src/androidTest/
-StatusLayout/src/main/res/drawable/
-StatusLayout/src/test/
-app/libs/

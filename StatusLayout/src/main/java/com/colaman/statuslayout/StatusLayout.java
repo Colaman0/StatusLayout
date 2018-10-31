@@ -1,6 +1,7 @@
 package com.colaman.statuslayout;
 
 import android.content.Context;
+import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.util.AttributeSet;
 import android.util.SparseArray;
@@ -23,12 +24,11 @@ public class StatusLayout extends ViewAnimator {
     public static final String ERROR = "error";
 
     private static List<StatusConfig> mStatusConfigs = new ArrayList<>();
-    private static List<String> mStatusList = new ArrayList<>();
-    private static List<View> mViewList = new ArrayList<>();
+    private SparseArray<String> mStatusArrays = new SparseArray<>();
     private Context mContext;
     private LayoutInflater mLayoutInflater;
     private OnLayoutClickListener mOnLayoutClickListener;
-    private int mCurrentPosition ;
+    private int mCurrentPosition;
     private boolean mUseDefault = true;
     private boolean mInited = false;
 
@@ -68,7 +68,7 @@ public class StatusLayout extends ViewAnimator {
      * @return
      * @throws RuntimeException
      */
-    public StatusLayout add(StatusConfig config) throws RuntimeException {
+    public StatusLayout add(StatusConfig config) {
         if (config == null) {
             throw new NullPointerException("config is null");
         }
@@ -83,7 +83,7 @@ public class StatusLayout extends ViewAnimator {
      * @param status    布局所代表的状态
      * @return
      */
-    public StatusLayout add(String status, @LayoutRes int layoutRes) throws RuntimeException {
+    public StatusLayout add(String status, @LayoutRes int layoutRes) {
         add(status, layoutRes, 0);
         return this;
     }
@@ -91,28 +91,55 @@ public class StatusLayout extends ViewAnimator {
     /**
      * 添加一种布局,点击clickRes的view才回调，有的布局类似错误重试是点击一个按钮才触发，就多传一个按钮的id。
      *
-     * @param status    布局资源文件
+     * @param status    布局状态
      * @param layoutRes 布局资源文件
      * @param clickRes  需要监听的某个view的id
      * @return
      */
-    public StatusLayout add(String status, @LayoutRes int layoutRes, int clickRes) throws RuntimeException {
-        int index = mStatusList.indexOf(status);
-        if (index >= 0) {
-            removeViewAt(index);
-        }
+    public StatusLayout add(String status, @LayoutRes int layoutRes, @IdRes int clickRes) {
         View view = mLayoutInflater.inflate(layoutRes, this, false);
         if (view == null) {
             throw new NullPointerException("layoutRes can't be converted to view ，please check the layoutRes");
         }
+        add(status, view, clickRes);
+        return this;
+    }
+
+    /**
+     * 添加一种布局
+     *
+     * @param status 布局对应的状态
+     * @param view   布局view
+     * @return
+     */
+    public StatusLayout add(String status, View view) {
+        add(status, view, 0);
+        return this;
+    }
+
+    /**
+     * 添加一种布局
+     *
+     * @param status   布局对应的状态
+     * @param view     布局view
+     * @param clickRes 需要监听的某个view的id
+     * @return
+     */
+    public StatusLayout add(String status, View view, @IdRes int clickRes) {
         View clickView = view.findViewById(clickRes);
         if (clickView == null) {
             clickView = view;
         }
         clickView.setOnClickListener(getClickListener(view, status));
-        addView(view);
-        mStatusList.add(status);
-        mViewList.add(view);
+        int index = getViewIndexByStatus(status);
+        if (index >= 0) {
+            removeViewAt(index);
+            addView(view, index);
+        } else {
+            int childCount = getChildCount();
+            addView(view);
+            mStatusArrays.put(childCount, status);
+        }
         return this;
     }
 
@@ -126,12 +153,11 @@ public class StatusLayout extends ViewAnimator {
             initDefault();
             mInited = true;
         }
-        int index = mStatusList.indexOf(status);
-        if (index < 0 || index + 1 == mCurrentPosition) {
-            return;
+        int index = getViewIndexByStatus(status);
+        if (index >= 0 && mCurrentPosition != index) {
+            setDisplayedChild(index);
+            mCurrentPosition = index;
         }
-        setDisplayedChild(index + 1);
-        mCurrentPosition = index + 1;
     }
 
     /**
@@ -179,6 +205,21 @@ public class StatusLayout extends ViewAnimator {
     }
 
     /**
+     * 通过status来找出对应status的key是多少，这个key存放的就该status的view在viewgroup中的index
+     *
+     * @param status
+     * @return
+     */
+    private int getViewIndexByStatus(String status) {
+        int index = -1;
+        int valueIndex = mStatusArrays.indexOfValue(status);
+        if (valueIndex >= 0) {
+            index = mStatusArrays.keyAt(valueIndex);
+        }
+        return index;
+    }
+
+    /**
      * 获取当前显示了第几个布局
      *
      * @return
@@ -186,19 +227,6 @@ public class StatusLayout extends ViewAnimator {
     public int getCurrentPosition() {
         return mCurrentPosition;
     }
-
-    public static void initEmpty(@LayoutRes int layoutRes) {
-        mStatusList.add(EMPTY);
-    }
-
-    public static void initError(@LayoutRes int layoutRes) {
-        mStatusList.add(ERROR);
-    }
-
-    public static void initLoading(@LayoutRes int layoutRes) {
-        mStatusList.add(LOADING);
-    }
-
 
     /**
      * get一个点击监听

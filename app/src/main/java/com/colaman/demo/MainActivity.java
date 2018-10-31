@@ -2,6 +2,7 @@ package com.colaman.demo;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,8 +32,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initStatusLayout() {
+
         mStatusLayout
-                .add(StatusLayout.LOADING,R.layout.include_loading)
+                .add(StatusLayout.LOADING, LayoutInflater.from(this).inflate(R.layout.include_loading, null))
+                .add(StatusLayout.ERROR, LayoutInflater.from(this).inflate(R.layout.include_error, null), R.id.btn_retry)
                 .setInAnimation(R.anim.anim_in_alpha)
                 .setOutAnimation(R.anim.anim_out_alpha)
                 .setDefaultAnimation()
