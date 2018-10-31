@@ -1,6 +1,8 @@
 package com.colaman.demo;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,24 +17,44 @@ public class MainActivity extends AppCompatActivity {
     public static final String ERROR = "error";
     public static final String EMPTY = "empty";
     public static final String NORMAL = "normal";
-    private MyClickListener mMyClickListener;
     private StatusLayout mStatusLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        mMyClickListener = new MyClickListener();
-        findViewById(R.id.btn_loading).setOnClickListener(mMyClickListener);
-        findViewById(R.id.btn_empty).setOnClickListener(mMyClickListener);
-        findViewById(R.id.btn_error).setOnClickListener(mMyClickListener);
-        findViewById(R.id.btn_normal).setOnClickListener(mMyClickListener);
-        mStatusLayout = findViewById(R.id.status_layout);
+        mStatusLayout = StatusLayout.init(this, R.layout.activity_main);
+        setContentView(mStatusLayout);
         initStatusLayout();
+        new CountDownTimer(100000, 3000) {
+            int num;
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+                num++;
+                switch (num % 4) {
+                    case 0:
+                        mStatusLayout.showDefaultContent();
+                        break;
+                    case 1:
+                        mStatusLayout.switchLayout(StatusLayout.LOADING);
+                        break;
+                    case 2:
+                        mStatusLayout.switchLayout(StatusLayout.EMPTY);
+                        break;
+                    case 3:
+                        mStatusLayout.switchLayout(StatusLayout.ERROR);
+                        break;
+                }
+            }
+
+            @Override
+            public void onFinish() {
+
+            }
+        }.start();
     }
 
     private void initStatusLayout() {
-
         mStatusLayout
                 .add(StatusLayout.LOADING, LayoutInflater.from(this).inflate(R.layout.include_loading, null))
                 .add(StatusLayout.ERROR, LayoutInflater.from(this).inflate(R.layout.include_error, null), R.id.btn_retry)
@@ -51,33 +73,10 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                             case ERROR:
                                 mStatusLayout.showDefaultContent();
+                                Toast.makeText(MainActivity.this, "显示content", Toast.LENGTH_SHORT).show();
                                 break;
                         }
                     }
                 });
-    }
-
-    private class MyClickListener implements View.OnClickListener {
-
-        @Override
-        public void onClick(View view) {
-            switch (view.getId()) {
-                case R.id.btn_loading:
-                    mStatusLayout.switchLayout(LOADING);
-                    break;
-                case R.id.btn_normal:
-                    mStatusLayout.showDefaultContent();
-                    break;
-                case R.id.btn_empty:
-                    // 这里的tag是你在add的时候传的标记，如果要切换原本默认显示的内容(也就是defaultInit里的布局)则传入StatusLayout.STATUS_NORMAL
-                    mStatusLayout.switchLayout(EMPTY);
-                    break;
-                case R.id.btn_error:
-                    mStatusLayout.switchLayout(ERROR);
-                    break;
-                default:
-                    break;
-            }
-        }
     }
 }

@@ -23,13 +23,19 @@ public class StatusLayout extends ViewAnimator {
     public static final String EMPTY = "empty";
     public static final String ERROR = "error";
 
+    // 全局状态布局的属性值
     private static List<StatusConfig> mStatusConfigs = new ArrayList<>();
+    // 存放不同状态的布局对应的数据
     private SparseArray<String> mStatusArrays = new SparseArray<>();
     private Context mContext;
     private LayoutInflater mLayoutInflater;
+    // 布局点击listener
     private OnLayoutClickListener mOnLayoutClickListener;
+    // 当前显示view在viewgroup中的index
     private int mCurrentPosition;
-    private boolean mUseDefault = true;
+    // 是否使用全局设置的属性
+    private boolean mUseGlobal = true;
+    // 是否已经加载过全局设置属性
     private boolean mInited = false;
 
     public StatusLayout(Context context) {
@@ -41,6 +47,34 @@ public class StatusLayout extends ViewAnimator {
         mContext = context;
         mLayoutInflater = LayoutInflater.from(mContext);
 
+    }
+
+
+    /**
+     * 用于activity/fragment等view的初始化方式使用，在布局文件中可以不用手动把根部局替换成statuslayout,
+     * 而是调用init方法把资源res传进来，返回一个statuslayout,直接把返回的statuslayout作为activity setcontentview()方法的参数
+     * @param context 上下文
+     * @param layoutRes 布局资源文件
+     * @return
+     */
+    public static StatusLayout init(Context context, @LayoutRes int layoutRes) {
+        View rootView = LayoutInflater.from(context).inflate(layoutRes, null);
+        return init(rootView);
+    }
+
+    /**
+     * 用于activity/fragment等view的初始化方式使用，在布局文件中可以不用手动把根部局替换成statuslayout,
+     * 而是调用init方法把资源res传进来，返回一个statuslayout,直接把返回的statuslayout作为activity setcontentview()方法的参数
+     * @param view 根view
+     * @return
+     */
+    public static StatusLayout init(View view) {
+        if (view == null) {
+            throw new NullPointerException("view can not be null");
+        }
+        StatusLayout statusLayout = new StatusLayout(view.getContext());
+        statusLayout.addView(view);
+        return statusLayout;
     }
 
     /**
@@ -55,7 +89,7 @@ public class StatusLayout extends ViewAnimator {
     /**
      * 设置全局数据
      *
-     * @param statusConfigs
+     * @param statusConfigs 状态属性值
      */
     public static void setGlobalData(List<StatusConfig> statusConfigs) {
         mStatusConfigs.addAll(statusConfigs);
@@ -149,7 +183,7 @@ public class StatusLayout extends ViewAnimator {
      * @param status 布局所代表的状态
      */
     public void switchLayout(String status) {
-        if (mUseDefault && !mInited) {
+        if (mUseGlobal && !mInited) {
             initDefault();
             mInited = true;
         }
@@ -169,6 +203,16 @@ public class StatusLayout extends ViewAnimator {
         }
         setDisplayedChild(0);
         mCurrentPosition = 0;
+    }
+
+    /**
+     * 设置是否使用全局设置的状态布局
+     * @param apply 是否使用，默认为使用
+     * @return
+     */
+    public StatusLayout applyGlobal(boolean apply) {
+        mUseGlobal = apply;
+        return this;
     }
 
     /**
@@ -207,7 +251,7 @@ public class StatusLayout extends ViewAnimator {
     /**
      * 通过status来找出对应status的key是多少，这个key存放的就该status的view在viewgroup中的index
      *
-     * @param status
+     * @param status 状态
      * @return
      */
     private int getViewIndexByStatus(String status) {
