@@ -1,5 +1,5 @@
 ## **StatusLayout 管理各种状态布局**
-> ###用于日常activity/fragment管理不同状态如`加载中``空页面``网络错误`等等，可以根据业务需求添加不同状态    
+> ### 用于日常activity/fragment管理不同状态如`加载中``空页面``网络错误`等等，可以根据业务需求添加不同状态    
 
 
 ## 优点：
@@ -101,4 +101,4 @@ setLayoutClickListener(new StatusLayout.OnLayoutClickListener() {
                 new StatusConfig(StatusLayout.ERROR, R.layout.include_error,R.id.btn_retry)));
 ```
 
-# 具体使用细节可以参考Demo！！！相信注释可以很好帮助你使用这个库，有什么问题欢迎提issue
+## 具体使用细节可以参考Demo！！！相信注释可以很好帮助你使用这个库，有什么问题欢迎提issue
