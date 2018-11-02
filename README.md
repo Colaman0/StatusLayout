@@ -8,8 +8,26 @@
 * 可以用在旧项目上，不需要修改原有xml文件
 * 可设置全局属性避免重复劳动
 
+## 使用
+
+```
+    allprojects {
+        repositories {
+            ...
+            maven { url 'https://jitpack.io' }
+        }
+    }
+ ```
+    
+```
+	dependencies {
+	        implementation 'com.github.Colaman0:StatusLayout:1.0.3'
+	}
+```
+
+
 ## 效果
-<!--![](https://s27.aconvert.com/convert/p3r68-cdx67/od2yi-isk9k.gif)-->
+![](https://www.dropbox.com/s/qk03ybwqcu7cbi1/t68yk-ctqg2.gif?dl=0)
 ### 上面的GIF图展示了切换布局的效果，在错误页面点击retry按钮切换回原本的内容
 
 ## 具体使用
