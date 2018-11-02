@@ -1,68 +1,104 @@
-## StatusLayout
-#####  用于同一个页面内需要切换多种不同类型布局
-##### eg:比如在一个activity里需要有空布局/错误提示等布局
+## **StatusLayout 管理各种状态布局**
+> ###用于日常activity/fragment管理不同状态如`加载中``空页面``网络错误`等等，可以根据业务需求添加不同状态    
 
-* 使用
+
+## 优点：
+* 自由定制需要的状态以及对应布局，只需要一行代码
+* 可以定制动画效果
+* 可以用在旧项目上，不需要修改原有xml文件
+* 可设置全局属性避免重复劳动
+
+## 效果
+<!--![](https://s27.aconvert.com/convert/p3r68-cdx67/od2yi-isk9k.gif)-->
+### 上面的GIF图展示了切换布局的效果，在错误页面点击retry按钮切换回原本的内容
+
+## 具体使用
+### 1.    把`StatusLayout`作为根布局在activity/fragment中使用 
+
+* 在xml内直接把`StatusLayout`作为根布局，注意`StatusLayout`内部子view数量不能超过1个，
+所以如果UI上需求需要排列多个View的时候，需要多套一层布局，比如：  
+
 ```
-allprojects {
-	repositories {
-		...
-		maven { url 'https://www.jitpack.io' }
-	}
-}
-```
-```
-dependencies {
-	implementation 'com.github.Colaman0:StatusLayout:1.0.2'
-}
+    <StatusLayout>
+        <LinearLayout>    
+            <View/>        
+            <View/>
+            <View/>
+        </LinearLayout>
+    </StatusLayout>
 ```
 
-* 示例
+* 通过 `StatusLayout.init()`方法传入Context以及你要显示到的layout资源文件，比如:   
 
-##### 在布局中直接使用就OK了
 ```
- <com.colaman.statuslayout.StatusLayout
-        android:id="@+id/status_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-       //这里可以实现你想要实现的页面
- </com.colaman.statuslayout.StatusLayout>
+// 在activity/fragment中使用  
+StatusLayout.init(this, R.layout.activity_main);
 ```
-##### 
- ```
-// ERROR的add方法里多加了一个id，这样点击事件的触发就是该id的view而不是默认的整个布局
-mStatusLayout
-                .add(LOADING, R.layout.include_loading)
-                .add(EMPTY, R.layout.include_empty)
-                .add(ERROR, R.layout.include_error,R.id.btn_retry)
-		// 可以设置动画效果
-                .setInAnimation(R.anim.anim_in_alpha)
-                .setOutAnimation(R.anim.anim_out_alpha)
-		// 没有特别的需求可以直接使用默认的透明度渐变的动画
-                .setDefaultAnimation()
-                .setLayoutClickListener(new StatusLayout.OnLayoutClickListener() {
-                    @Override
-                    public void OnLayoutClick(View view, String status) {
-                        switch (status) {
-                            case LOADING:
-                                Toast.makeText(MainActivity.this, LOADING, Toast.LENGTH_SHORT).show();
-                                break;
-                            case EMPTY:
-                                Toast.makeText(MainActivity.this, EMPTY, Toast.LENGTH_SHORT).show();
-                                break;
-                            case ERROR:
-			    	// 在上面add的时候ERROR状态传进一个id，这个id的button点击之后显示回正常布局，布局其他地方不会触发
-                                mStatusLayout.showDefaultContent();
-                                break;
-                        }
-                    }
-                });
+
+这个方法会返回一个StatusLayout对象，所以大家可以在封装BaseActivity的时候这样写:  
+
 ```
-##### 当你需要切换布局的时候:
+// 后续可以通过mStatusLayout添加不同状态对应的UI  
+StatusLayout mStatusLayout = StatusLayout.init(this, R.layout.activity_main);   
+setContentView(mStatusLayout);
+```     
+            
+### 2. 添加不同状态对应的UI以及响应点击事件
+
+通过add方法来添加一种状态布局，add方法有多个参数，详细可以参考demo或者查看代码  
+>这里需要注意的一点是第三个参数`clickRes`，这个参数可传可不传，考虑到有些类似错误重试/空页面，可能需要一个按钮来点击重试而不是整个页面响应点击，当你传了一个按钮的idRes进去之后，就只响应idRes对应的view的点击事件，否则一律是整个页面响应点击事件
+
+
 ```
-// 这里的tag是你在add的时候传的标记，如果要切换原本的布局则调用showDefaultContent()方法
- mStatusLayout.switchLayout(tag); / mStatusLayout.showDefaultContent();
+    add(String status, @LayoutRes int layoutRes, @IdRes int clickRes)
 ```
 
 
-* 具体的实现可以查看代码，实现比较简单，有什么bug或者问题欢迎提issue，暂时没有一些自定义属性，只能通过代码方式去添加，因为是自己项目统一封装了一下不想每次都写一样的代码。
+### 3. 切换布局
+通过`switchLayout()`/`showDefaultContent()`两种方法来切换布局  
+
+* `switchLayout()`方法是用于切换你add进去的布局，只要传入你前面add布局的时候传入的status就可以了
+* `showDefaultContent()`用于切换回你默认的UI，比如在切到error状态的UI时，你点击了重试按钮请求成功之后，通过`showDefaultContent()`方法切换正常的布局，具体可以参考下面的代码    
+
+### 4. 不同布局点击的回调
+
+通过`setLayoutClickListener()`方法来设置监听   
+
+```
+
+setLayoutClickListener(new StatusLayout.OnLayoutClickListener() {
+    @Override
+    public void OnLayoutClick(View view, String status) {
+         // View: 对应status的rootView  
+         // status:当前status,可以判断当前页面处于哪个status
+        switch (status) {
+            case LOADING:
+                Toast.makeText(MainActivity.this, LOADING, Toast.LENGTH_SHORT).show();
+                break;
+            case EMPTY:
+                Toast.makeText(MainActivity.this, EMPTY, Toast.LENGTH_SHORT).show();
+                break;
+            case ERROR:  
+                 // 这里通过showDefaultContent()方法展示默认的布局
+                mStatusLayout.showDefaultContent();
+                break;
+        }
+    }
+});
+```
+
+### 5. 设置显示/隐藏的动画
+通过`setInAnimation()`/`setOutAnimation()` 来设置页面显示/隐藏的的动画, 也可以通过`setDefaultAnimation()`来使用默认的淡入淡出的效果
+
+
+
+### 6.设置全局属性
+通过`StatusLayout.setGlobalData()`方法来设置全局的属性，很多时候`错误页面/loading`页面整个APP都是一样的，这个时候可以设置全局属性来避免重复代码，后续可以通过`add（）`方法来覆盖全局属性, `StatusConfig`包含的参数和通过`add()`方法传入的参数值是一样的
+
+```
+ StatusLayout.setGlobalData( Arrays.asList(
+                new StatusConfig(StatusLayout.EMPTY, R.layout.include_empty,0),
+                new StatusConfig(StatusLayout.ERROR, R.layout.include_error,R.id.btn_retry)));
+```
+
+# 具体使用细节可以参考Demo！！！相信注释可以很好帮助你使用这个库，有什么问题欢迎提issue
