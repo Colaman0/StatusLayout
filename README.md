@@ -1,5 +1,5 @@
 ## **StatusLayout 管理各种状态布局**
-> ### 用于日常activity/fragment管理不同状态如`加载中``空页面``网络错误`等等，可以根据业务需求添加不同状态    
+> ### 用于日常activity/fragment管理不同状态如 `加载中` `空页面` `网络错误`等等，可以根据业务需求添加不同状态    
 
 
 ## 优点：
@@ -27,7 +27,7 @@
 
 
 ## 效果
-![](https://www.dropbox.com/s/qk03ybwqcu7cbi1/t68yk-ctqg2.gif?dl=0)
+![](https://raw.githubusercontent.com/Colaman0/StatusLayout/master/screenshot/screenshot.gif)
 ### 上面的GIF图展示了切换布局的效果，在错误页面点击retry按钮切换回原本的内容
 
 ## 具体使用
