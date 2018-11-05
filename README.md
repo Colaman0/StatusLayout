@@ -1,5 +1,5 @@
 ## **StatusLayout 管理各种状态布局**
-> ### 用于日常activity/fragment管理不同状态如 `加载中` `空页面` `网络错误`等等，可以根据业务需求添加不同状态    
+> ### 用于日常activity/fragment/任意view中管理不同状态如 `加载中` `空页面` `网络错误`等等，可以根据业务需求添加不同状态    
 
 
 ## 优点：
@@ -31,7 +31,7 @@
 ### 上面的GIF图展示了切换布局的效果，在错误页面点击retry按钮切换回原本的内容
 
 ## 具体使用
-### 1.    把`StatusLayout`作为根布局在activity/fragment中使用 
+### 1.    把`StatusLayout`作为根布局在activity/fragment/view 中使用 
 
 * 在xml内直接把`StatusLayout`作为根布局，注意`StatusLayout`内部子view数量不能超过1个，
 所以如果UI上需求需要排列多个View的时候，需要多套一层布局，比如：  
