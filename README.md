@@ -27,7 +27,8 @@
 
 
 ## 效果
-![](https://raw.githubusercontent.com/Colaman0/StatusLayout/master/screenshot/screenshot.gif)
+<img src="https://raw.githubusercontent.com/Colaman0/StatusLayout/master/screenshot/screenshot.gif" width = "30%" />
+
 ### 上面的GIF图展示了切换布局的效果，在错误页面点击retry按钮切换回原本的内容
 
 ## 具体使用
