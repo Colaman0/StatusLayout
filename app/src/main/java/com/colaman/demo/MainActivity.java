@@ -22,42 +22,47 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mStatusLayout = StatusLayout.init(this, R.layout.activity_main);
-        setContentView(mStatusLayout);
+//        mStatusLayout = StatusLayout.init(this, R.layout.activity_main);
+        setContentView(R.layout.activity_main);
         initStatusLayout();
-        new CountDownTimer(100000, 3000) {
-            int num;
-
+        findViewById(R.id.btn_content).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onTick(long millisUntilFinished) {
-                num++;
-                switch (num % 4) {
-                    case 0:
-                        mStatusLayout.showDefaultContent();
-                        break;
-                    case 1:
-                        mStatusLayout.switchLayout(StatusLayout.LOADING);
-                        break;
-                    case 2:
-                        mStatusLayout.switchLayout(StatusLayout.EMPTY);
-                        break;
-                    case 3:
-                        mStatusLayout.switchLayout(StatusLayout.ERROR);
-                        break;
-                }
+            public void onClick(View v) {
+                mStatusLayout.showDefaultContent();
             }
-
+        });
+        findViewById(R.id.btn_error).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onFinish() {
-
+            public void onClick(View v) {
+                mStatusLayout.switchLayout(ERROR);
             }
-        }.start();
+        });
+        findViewById(R.id.btn_empty).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mStatusLayout.switchLayout(EMPTY);
+            }
+        });
+        findViewById(R.id.btn_loading).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mStatusLayout.switchLayout(LOADING);
+            }
+        });
     }
 
     private void initStatusLayout() {
+        View errorView = LayoutInflater.from(this).inflate(R.layout.include_error, mStatusLayout,false);
+        errorView.findViewById(R.id.btn_retry).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "retry", Toast.LENGTH_SHORT);
+            }
+        });
+        mStatusLayout = findViewById(R.id.status_layout);
         mStatusLayout
-                .add(StatusLayout.LOADING, LayoutInflater.from(this).inflate(R.layout.include_loading, null))
-                .add(StatusLayout.ERROR, LayoutInflater.from(this).inflate(R.layout.include_error, null), R.id.btn_retry)
+                .add(LOADING, LayoutInflater.from(this).inflate(R.layout.include_loading, null))
+                .add(ERROR, errorView)
                 .setInAnimation(R.anim.anim_in_alpha)
                 .setOutAnimation(R.anim.anim_out_alpha)
                 .setDefaultAnimation()
@@ -73,7 +78,6 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                             case ERROR:
                                 mStatusLayout.showDefaultContent();
-                                Toast.makeText(MainActivity.this, "显示content", Toast.LENGTH_SHORT).show();
                                 break;
                         }
                     }

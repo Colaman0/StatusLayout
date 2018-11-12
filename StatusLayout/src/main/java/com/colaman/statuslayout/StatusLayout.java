@@ -7,6 +7,7 @@ import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Toast;
 import android.widget.ViewAnimator;
 
 import com.example.statuslayout.R;
@@ -19,10 +20,6 @@ import java.util.List;
  * Function : 管理不同状态下布局显示
  */
 public class StatusLayout extends ViewAnimator {
-    public static final String LOADING = "loading";
-    public static final String EMPTY = "empty";
-    public static final String ERROR = "error";
-
     // 全局状态布局的属性值
     private static List<StatusConfig> mStatusConfigs = new ArrayList<>();
     // 存放不同状态的布局对应的数据
@@ -46,14 +43,14 @@ public class StatusLayout extends ViewAnimator {
         super(context, attrs);
         mContext = context;
         mLayoutInflater = LayoutInflater.from(mContext);
-
     }
 
 
     /**
      * 用于activity/fragment等view的初始化方式使用，在布局文件中可以不用手动把根部局替换成statuslayout,
      * 而是调用init方法把资源res传进来，返回一个statuslayout,直接把返回的statuslayout作为activity setcontentview()方法的参数
-     * @param context 上下文
+     *
+     * @param context   上下文
      * @param layoutRes 布局资源文件
      * @return
      */
@@ -65,6 +62,7 @@ public class StatusLayout extends ViewAnimator {
     /**
      * 用于activity/fragment等view的初始化方式使用，在布局文件中可以不用手动把根部局替换成statuslayout,
      * 而是调用init方法把资源res传进来，返回一个statuslayout,直接把返回的statuslayout作为activity setcontentview()方法的参数
+     *
      * @param view 根view
      * @return
      */
@@ -100,7 +98,6 @@ public class StatusLayout extends ViewAnimator {
      *
      * @param config StatusConfig
      * @return
-     * @throws RuntimeException
      */
     public StatusLayout add(StatusConfig config) {
         if (config == null) {
@@ -160,11 +157,14 @@ public class StatusLayout extends ViewAnimator {
      * @return
      */
     public StatusLayout add(String status, View view, @IdRes int clickRes) {
-        View clickView = view.findViewById(clickRes);
-        if (clickView == null) {
-            clickView = view;
+        // 传入了clickRes的时候再监听，否则交给view自身去处理逻辑
+        if (clickRes != 0) {
+            View clickView = view.findViewById(clickRes);
+            if (clickView == null) {
+                clickView = view;
+            }
+            clickView.setOnClickListener(getClickListener(view, status));
         }
-        clickView.setOnClickListener(getClickListener(view, status));
         int index = getViewIndexByStatus(status);
         if (index >= 0) {
             removeViewAt(index);
@@ -198,15 +198,16 @@ public class StatusLayout extends ViewAnimator {
      * 切换到默认的内容，即布局资源文件中添加的内容
      */
     public void showDefaultContent() {
-        if (mCurrentPosition == 0) {
-            return;
+        if (mCurrentPosition != 0 && mStatusArrays.get(0) == null) {
+            Toast.makeText(mContext, "没有content", Toast.LENGTH_SHORT);
+            setDisplayedChild(0);
+            mCurrentPosition = 0;
         }
-        setDisplayedChild(0);
-        mCurrentPosition = 0;
     }
 
     /**
      * 设置是否使用全局设置的状态布局
+     *
      * @param apply 是否使用，默认为使用
      * @return
      */

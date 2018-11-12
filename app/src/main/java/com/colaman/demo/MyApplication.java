@@ -18,8 +18,8 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        StatusLayout.setGlobalData( Arrays.asList(
-                new StatusConfig(StatusLayout.EMPTY, R.layout.include_empty,0),
-                new StatusConfig(StatusLayout.ERROR, R.layout.include_error,R.id.btn_retry)));
+//        StatusLayout.setGlobalData( Arrays.asList(
+//                new StatusConfig(MainActivity.EMPTY, R.layout.include_empty,0),
+//                new StatusConfig(MainActivity.ERROR, R.layout.include_error,R.id.btn_retry)));
     }
 }
