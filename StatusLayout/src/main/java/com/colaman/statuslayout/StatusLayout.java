@@ -7,7 +7,6 @@ import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Toast;
 import android.widget.ViewAnimator;
 
 import com.example.statuslayout.R;
@@ -199,7 +198,6 @@ public class StatusLayout extends ViewAnimator {
      */
     public void showDefaultContent() {
         if (mCurrentPosition != 0 && mStatusArrays.get(0) == null) {
-            Toast.makeText(mContext, "没有content", Toast.LENGTH_SHORT);
             setDisplayedChild(0);
             mCurrentPosition = 0;
         }

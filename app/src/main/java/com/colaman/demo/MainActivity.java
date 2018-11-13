@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -22,7 +23,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        mStatusLayout = StatusLayout.init(this, R.layout.activity_main);
         setContentView(R.layout.activity_main);
         initStatusLayout();
         findViewById(R.id.btn_content).setOnClickListener(new View.OnClickListener() {
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         errorView.findViewById(R.id.btn_retry).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "retry", Toast.LENGTH_SHORT);
+                Log.d("statuslayout", "error click");
             }
         });
         mStatusLayout = findViewById(R.id.status_layout);
@@ -69,17 +69,7 @@ public class MainActivity extends AppCompatActivity {
                 .setLayoutClickListener(new StatusLayout.OnLayoutClickListener() {
                     @Override
                     public void OnLayoutClick(View view, String status) {
-                        switch (status) {
-                            case LOADING:
-                                Toast.makeText(MainActivity.this, LOADING, Toast.LENGTH_SHORT).show();
-                                break;
-                            case EMPTY:
-                                Toast.makeText(MainActivity.this, EMPTY, Toast.LENGTH_SHORT).show();
-                                break;
-                            case ERROR:
-                                mStatusLayout.showDefaultContent();
-                                break;
-                        }
+                        Log.d("statuslayout", status+" =  click");
                     }
                 });
     }
