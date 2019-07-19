@@ -21,7 +21,7 @@
     
 ```
 	dependencies {
-	        implementation 'com.github.Colaman0:StatusLayout:1.0.4'
+	        implementation 'com.github.Colaman0:StatusLayout:1.0.6'
 	}
 ```
 
@@ -64,12 +64,12 @@ setContentView(mStatusLayout);
             
 ### 2. 添加不同状态对应的UI以及响应点击事件
 
-通过add方法来添加一种状态布局，add方法有多个参数，详细可以参考demo或者查看代码  
->这里需要注意的一点是第三个参数`clickRes`，这个参数可传可不传，考虑到有些类似错误重试/空页面，可能需要一个按钮来点击重试而不是整个页面响应点击，当你传了一个按钮的idRes进去之后，就只响应idRes对应的view的点击事件，比较复杂的操作类型，可以传一个view，具体逻辑在外部自己操作view来管理逻辑
+通过add方法来添加一种状态布局，传入`StatusConfig`参数类
+>这里需要注意的一点是`StatusConfig`的参数`clickRes`，这个参数可传可不传，考虑到有些类似错误重试/空页面，可能需要一个按钮来点击重试而不是整个页面响应点击，当你传了一个按钮的idRes进去之后，就只响应idRes对应的view的点击事件，比较复杂的操作类型，可以传一个view，具体逻辑在外部自己操作view来管理逻辑
 
 
 ```
-    add(String status, @LayoutRes int layoutRes, @IdRes int clickRes)
+    add(statusconfig:StatusConfig)
 ```
 
 
