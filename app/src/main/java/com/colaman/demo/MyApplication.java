@@ -19,7 +19,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         // 设置全局属性
-        StatusLayout.setGlobalData(Arrays.asList(
+        StatusLayout.Companion.setGlobalData(Arrays.asList(
                 new StatusConfig(MainActivity.EMPTY, R.layout.include_empty, 0),
                 new StatusConfig(MainActivity.ERROR, R.layout.include_error, R.id.btn_retry)));
     }
