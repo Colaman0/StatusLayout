@@ -20,7 +20,7 @@ import java.util.ArrayList
  *             有STATUS_NORMAL/STATUS_LOADING等默认的几个key可以使用，正常状态的布局建议用STATUS_NORMAL作为key添加
  *             如果用自定义的key，那么需要最先添加到statuslayout中，再添加如loading，error等布局
  */
-class StatusLayout constructor(protected var mContext: Context, attrs: AttributeSet? = null) : ViewAnimator(mContext, attrs) {
+open class StatusLayout constructor(protected var mContext: Context, attrs: AttributeSet? = null) : ViewAnimator(mContext, attrs) {
     /**
      * 默认的一些key，可用可不用
      */
@@ -140,7 +140,7 @@ class StatusLayout constructor(protected var mContext: Context, attrs: Attribute
      *
      * @param status 布局所代表的状态
      */
-    fun switchLayout(status: String) {
+     fun switchLayout(status: String) {
         /**
          * 如果有全局设置，延迟到切换布局时再添加到statuslayout中
          */

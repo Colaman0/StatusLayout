@@ -20,7 +20,7 @@ public class MyApplication extends Application {
         super.onCreate();
         // 设置全局属性
         StatusLayout.Companion.setGlobalData(Arrays.asList(
-                new StatusConfig(MainActivity.EMPTY, R.layout.include_empty, 0),
-                new StatusConfig(MainActivity.ERROR, R.layout.include_error, R.id.btn_retry)));
+                new StatusConfig(MainActivity.Companion.getEMPTY(), R.layout.include_empty, 0),
+                new StatusConfig(MainActivity.Companion.getERROR(), R.layout.include_error, R.id.btn_retry)));
     }
 }
