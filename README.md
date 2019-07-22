@@ -1,4 +1,4 @@
-#### StatusLayout  : 一个超高自定义度又简单的页面状态管理库
+## StatusLayout  : 一个超高自定义度又简单的页面状态管理库
 #### 业务场景需求：
 ##### 在日常开发App的过程中，我们少不了对`Activity`/`Fragment` 等做一些不同状态不同UI的状态管理逻辑，比如`空页面` `错误重试页面` 等等，网上也有很多作者写了开源库来处理这些问题
 ----
@@ -133,8 +133,8 @@ StatusLayout.setGlobalData(       
     StatusConfig(status = StatusLayout.STATUS_ERROR, layoutRes = R.layout.include_error, clickRes = R.id.btn_retry))
 ```
 
-### 总结
-#### 以上六点就讲解完了`StatusLayout`的一个使用，在我一开始写的时候，是想着能尽量适应多种场景以及尽可能少的代码逻辑
+## 总结
+### 以上六点就讲解完了`StatusLayout`的一个使用，在我一开始写的时候，是想着能尽量适应多种场景以及尽可能少的代码逻辑
 * #### 比如电商APP中一个订单支付成功失败loading等场景，可以通过`StatusLayout`去对应添加布局，并且对于一些通用的状态，可以设置全局属性避免不同地方出现一样的代码，并且以后需要更换布局的时候只要在设置全局属性的地方修改一下layout就可以了。
 * #### 点击回调通过`setLayoutClickListener` 去处理不同状态下的点击事件回调，不需要写不同的回调事件，也可以更好的对于多种多样的布局来做一个适应
 #### 整个库的核心想法就是通过`status`来管理页面，`StatusLayout`只负责管理你添加进来的布局，以及对应切换某个`status`的布局。并不会限制得很死要调用某个方法，所以你可以尽情得自定义你的页面，添加各种各样的布局进去，然后通过`switchLayout（）`来切换布局就可以了。
