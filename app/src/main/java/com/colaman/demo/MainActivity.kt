@@ -22,32 +22,26 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         initStatusLayout()
         findViewById<View>(R.id.btn_content).setOnClickListener { mStatusLayout!!.showDefaultContent() }
-        findViewById<View>(R.id.btn_error).setOnClickListener { mStatusLayout!!.switchLayout(ERROR) }
-        findViewById<View>(R.id.btn_empty).setOnClickListener { mStatusLayout!!.switchLayout(EMPTY) }
-        findViewById<View>(R.id.btn_loading).setOnClickListener { mStatusLayout!!.switchLayout(LOADING) }
+        findViewById<View>(R.id.btn_error).setOnClickListener { mStatusLayout!!.switchLayout(StatusLayout.STATUS_ERROR) }
+        findViewById<View>(R.id.btn_empty).setOnClickListener { mStatusLayout!!.switchLayout(StatusLayout.STATUS_EMPTY) }
+        findViewById<View>(R.id.btn_loading).setOnClickListener { mStatusLayout!!.switchLayout(StatusLayout.STATUS_LOADING) }
     }
 
     private fun initStatusLayout() {
-        val errorView = LayoutInflater.from(this).inflate(R.layout.include_error, mStatusLayout, false)
-        errorView.findViewById<View>(R.id.btn_retry).setOnClickListener { Log.d("statuslayout", "error click") }
         mStatusLayout = findViewById(R.id.status_layout)
+        val errorView = LayoutInflater.from(this).inflate(R.layout.include_error, mStatusLayout, false)
+        errorView.findViewById<View>(R.id.btn_retry).setOnClickListener {
+            Toast.makeText(this@MainActivity, " error layout  is Click  ", Toast.LENGTH_SHORT).show()
+            mStatusLayout?.showDefaultContent()
+        }
         mStatusLayout!!
-                .add(StatusConfig(LOADING, view = LayoutInflater.from(this).inflate(R.layout.include_loading, null)))
-                .add(StatusConfig(ERROR, view = errorView))
-                .setInAnimation(R.anim.anim_in_alpha)
-                .setOutAnimation(R.anim.anim_out_alpha)
+                .add(StatusConfig(StatusLayout.STATUS_LOADING, view = LayoutInflater.from(this).inflate(R.layout.include_loading, null)))
+                .add(StatusConfig(StatusLayout.STATUS_ERROR, view = errorView, autoClcik = true))
                 .setDefaultAnimation()
                 .setLayoutClickListener(object : StatusLayout.OnLayoutClickListener {
                     override fun OnLayoutClick(view: View, status: String?) {
-                        Log.d("statuslayout", status!! + " =  click")
+                        Toast.makeText(this@MainActivity, " status = $status  is Click  ", Toast.LENGTH_SHORT).show()
                     }
                 })
-    }
-
-    companion object {
-        val LOADING = "loading"
-        val ERROR = "error"
-        val EMPTY = "empty"
-        val NORMAL = "normal"
     }
 }
