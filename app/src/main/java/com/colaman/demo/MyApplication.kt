@@ -20,5 +20,7 @@ class MyApplication : Application() {
         // 设置全局属性
         StatusLayout.setGlobalData(
                 StatusConfig(status = StatusLayout.STATUS_EMPTY, layoutRes = R.layout.include_empty))
+        // 设置全局动画
+        StatusLayout.setGlobalAnim(R.anim.anim_in_alpha, R.anim.anim_out_alpha)
     }
 }

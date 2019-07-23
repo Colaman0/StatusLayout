@@ -1,6 +1,7 @@
 package com.colaman.statuslayout
 
 import android.content.Context
+import android.support.annotation.AnimRes
 import android.support.annotation.IdRes
 import android.support.annotation.LayoutRes
 import android.util.AttributeSet
@@ -39,6 +40,11 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
         val mGlobalStatusConfigs by lazy {
             HashMap<String, StatusConfig>()
         }
+
+        // 全局的布局显示的动画
+        var mGlobalInAnimation: Int = R.anim.anim_in_alpha
+        var mGlobalOutAnimation: Int = R.anim.anim_out_alpha
+
 
         /**
          * 用于activity/fragment等view的初始化方式使用，在布局文件中可以不用手动把根部局替换成statuslayout,
@@ -80,6 +86,17 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
                 mGlobalStatusConfigs[it.status] = it
             }
         }
+
+        /**
+         * 设置全局动画
+         *
+         * @param inAnimRes
+         * @param outAnimRes
+         */
+        fun setGlobalAnim(@AnimRes inAnimRes: Int, @AnimRes outAnimRes: Int) {
+            mGlobalInAnimation = inAnimRes
+            mGlobalOutAnimation = outAnimRes
+        }
     }
 
     protected val mLayoutInflater: LayoutInflater by lazy {
@@ -98,6 +115,9 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
     // 是否已经加载过全局设置属性
     protected var mInited = false
 
+    // 布局显示的动画
+    var mInAnimation: Int = mGlobalInAnimation
+    var mOutAnimation: Int = mGlobalOutAnimation
 
     /**
      * 加载默认属性
@@ -162,6 +182,9 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
             initDefault()
             mInited = true
         }
+        if (inAnimation == null || outAnimation == null) {
+            setAnimation(mGlobalInAnimation, mGlobalOutAnimation)
+        }
         val index = getViewIndexByStatus(status)
         if (index >= 0 && currentPosition != index) {
             displayedChild = index
@@ -219,32 +242,12 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
      * @param animationRes 动画资源文件
      * @return
      */
-    fun setInAnimation(animationRes: Int): StatusLayout {
-        setInAnimation(mContext, animationRes)
+    fun setAnimation(@AnimRes inRes: Int, @AnimRes outRes: Int): StatusLayout {
+        setInAnimation(mContext, inRes)
+        setOutAnimation(mContext, outRes)
         return this
     }
 
-    /**
-     * 隐藏布局时的动画效果
-     *
-     * @param animationRes 动画资源文件
-     * @return
-     */
-    fun setOutAnimation(animationRes: Int): StatusLayout {
-        setOutAnimation(mContext, animationRes)
-        return this
-    }
-
-    /**
-     * 设置默认的的动画效果
-     *
-     * @return
-     */
-    fun setDefaultAnimation(): StatusLayout {
-        setInAnimation(R.anim.anim_in_alpha)
-        setOutAnimation(R.anim.anim_out_alpha)
-        return this
-    }
 
     /**
      * 通过status来找出对应status的key是多少，这个key存放的就该status的view在viewgroup中的index

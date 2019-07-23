@@ -29,15 +29,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun initStatusLayout() {
         mStatusLayout = findViewById(R.id.status_layout)
+
+        // 这里错误类型布局直接inflate成一个view，展示另一种添加布局的方法
         val errorView = LayoutInflater.from(this).inflate(R.layout.include_error, mStatusLayout, false)
         errorView.findViewById<View>(R.id.btn_retry).setOnClickListener {
             Toast.makeText(this@MainActivity, " error layout  is Click  ", Toast.LENGTH_SHORT).show()
             mStatusLayout?.showDefaultContent()
         }
+
+        // 下面的代码展示了两种add方式
         mStatusLayout!!
                 .add(StatusConfig(StatusLayout.STATUS_LOADING, view = LayoutInflater.from(this).inflate(R.layout.include_loading, null)))
                 .add(StatusConfig(StatusLayout.STATUS_ERROR, view = errorView, autoClcik = true))
-                .setDefaultAnimation()
                 .setLayoutClickListener(object : StatusLayout.OnLayoutClickListener {
                     override fun OnLayoutClick(view: View, status: String?) {
                         Toast.makeText(this@MainActivity, " status = $status  is Click  ", Toast.LENGTH_SHORT).show()
