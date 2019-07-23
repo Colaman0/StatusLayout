@@ -121,7 +121,7 @@
 ##### 讲解一下上面的代码，设置一个layout点击的回调监听，当`layout/clickRes` 对应的view被点击的时候，会回调当前是哪一个status的页面，以及对应的布局view，当我们的`clickRes`不传的时候，默认是整个页面响应点击事件，所以在add的时候比较灵活的处理了关于点击事件的处理，比较复杂的页面建议就在`add`的时候传入一个`view`然后在内部做处理比较合适了，避免拓展出一大堆方法。
 
 ### 5. 设置显示/隐藏的动画
-##### 通过`setInAnimation()`/`setOutAnimation()` 来设置页面显示/隐藏的的动画, 也可以通过`setDefaultAnimation()`来使用默认的淡入淡出的效果
+##### 通过`setAnimation()` 来设置页面显示/隐藏的的动画, 也可以通过`setGlobalAnim()`来设置一个全局的动画效果，`setAnimation()`的优先级比`setGlobalAnim()`更高
 
 
 ### 6.设置全局属性
