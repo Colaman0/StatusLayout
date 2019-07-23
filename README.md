@@ -90,7 +90,7 @@
 ####  通过`switchLayout()`/`showDefaultContent()`两种方法来切换布局  
 
 * ##### `switchLayout(status : String)`方法是用于切换你add进去的布局，只要传入你前面add布局的时候传入的status就可以了
-* ##### `showDefaultContent()`用于切换回你默认的UI，比如在切到error状态的UI时，你点击了重试按钮请求成功之后，通过`showDefaultContent()`方法切换正常的布局，可能是你在xml里默认的一个布局，也可以是通过`add`方法添加进去的布局，但是总体来说切换回正常状态布局调用这个方法就可以了，具体可以参考下面关于回调的代码 
+* ##### `showDefaultContent()`用于切换回你默认的UI，比如在切到error状态的UI时，你点击了重试按钮请求成功之后，通过`showDefaultContent()`方法切换正常的布局，可能是你在xml里默认的一个布局，也可以是通过`add`方法添加进去的布局，通过`add`添加进去的布局需要`status`为`STATUS_NORMAL`才会被`StatusLayout`认为是默认的布局。总体来说切换回正常状态布局调用这个方法就可以了，具体可以参考下面关于回调的代码 
 
 
 ### 4.  不同布局点击的回调
