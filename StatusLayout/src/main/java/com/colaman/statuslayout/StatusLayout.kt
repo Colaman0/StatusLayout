@@ -1,19 +1,15 @@
 package com.colaman.statuslayout
 
+
 import android.content.Context
 import android.support.annotation.AnimRes
-import android.support.annotation.IdRes
 import android.support.annotation.LayoutRes
 import android.util.AttributeSet
-import android.util.SparseArray
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnClickListener
 import android.widget.ViewAnimator
-import com.colaman.statuslayout.StatusLayout.Companion.mStatusConfigs
-
 import com.example.statuslayout.R
-
-import java.util.ArrayList
 
 /**
  * Create by kyle on 2018/9/30
@@ -30,11 +26,6 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
         const val STATUS_LOADING = "loading_content"
         const val STATUS_ERROR = "error_content"
         const val STATUS_EMPTY = "empty_content"
-
-        // 状态布局集合
-        val mStatusConfigs by lazy {
-            HashMap<String, StatusConfig>()
-        }
 
         // 全局状态布局的属性值
         val mGlobalStatusConfigs by lazy {
@@ -71,7 +62,7 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
                 throw NullPointerException("view can not be null")
             }
             val statusLayout = StatusLayout(view.context)
-            mStatusConfigs[STATUS_NORMAL] = StatusConfig(STATUS_NORMAL, view = view)
+            statusLayout.add(StatusConfig(STATUS_NORMAL, view = view))
             statusLayout.addView(view)
             return statusLayout
         }
@@ -99,32 +90,37 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
         }
     }
 
-    protected val mLayoutInflater: LayoutInflater by lazy {
+    // 状态布局集合
+    private val statusConfigs by lazy {
+        HashMap<String, StatusConfig>()
+    }
+
+    private val layoutInflater: LayoutInflater by lazy {
         LayoutInflater.from(mContext)
     }
 
     // 布局点击listener
-    protected var mOnLayoutClickListener: OnLayoutClickListener? = null
+    private var layoutClickListener: OnLayoutClickListener? = null
 
     // 当前显示view在viewgroup中的index
     var currentPosition: Int = 0
 
     // 是否使用全局设置的属性
-    protected var mUseGlobal = true
+    protected var useGlobal = true
 
     // 是否已经加载过全局设置属性
-    protected var mInited = false
+    protected var inited = false
 
     // 布局显示的动画
-    var mInAnimation: Int = mGlobalInAnimation
-    var mOutAnimation: Int = mGlobalOutAnimation
+    var inAnimation: Int = mGlobalInAnimation
+    var outAnimation: Int = mGlobalOutAnimation
 
     /**
      * 加载默认属性
      */
     protected fun initDefault() {
         mGlobalStatusConfigs.forEach {
-            if (!mStatusConfigs.containsKey(it.key)) {
+            if (!statusConfigs.containsKey(it.key)) {
                 add(config = it.value)
             }
         }
@@ -142,7 +138,7 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
         }
         var (status, layoutRes, view, clickRes, autoClick) = config
         if (view == null) {
-            view = mLayoutInflater.inflate(layoutRes, this, false)
+            view = layoutInflater.inflate(layoutRes, this, false)
         }
         /**
          * 传入了clickRes的时候再监听，否则交给view自身去处理逻辑,并且判断是否需要自动处理点击事件，autoClick为false
@@ -165,7 +161,7 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
         } else {
             addView(view)
         }
-        mStatusConfigs.put(status, config)
+        statusConfigs.put(status, config)
         return this
     }
 
@@ -178,12 +174,9 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
         /**
          * 如果有全局设置，延迟到切换布局时再添加到statuslayout中
          */
-        if (mUseGlobal && !mInited) {
+        if (useGlobal && !inited) {
             initDefault()
-            mInited = true
-        }
-        if (inAnimation == null || outAnimation == null) {
-            setAnimation(mGlobalInAnimation, mGlobalOutAnimation)
+            inited = true
         }
         val index = getViewIndexByStatus(status)
         if (index >= 0 && currentPosition != index) {
@@ -232,7 +225,7 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
      * @return
      */
     fun applyGlobal(apply: Boolean): StatusLayout {
-        mUseGlobal = apply
+        useGlobal = apply
         return this
     }
 
@@ -272,8 +265,8 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
      */
     fun getClickListener(view: View, status: String?): View.OnClickListener {
         return OnClickListener {
-            if (mOnLayoutClickListener != null) {
-                mOnLayoutClickListener!!.OnLayoutClick(view, status)
+            if (layoutClickListener != null) {
+                layoutClickListener!!.OnLayoutClick(view, status)
             }
         }
     }
@@ -284,7 +277,7 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
      * @param onLayoutClickListener
      */
     fun setLayoutClickListener(onLayoutClickListener: OnLayoutClickListener) {
-        mOnLayoutClickListener = onLayoutClickListener
+        layoutClickListener = onLayoutClickListener
     }
 
     /**
