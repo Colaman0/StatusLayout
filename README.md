@@ -34,7 +34,7 @@
     
 ```
 	dependencies {
-	        implementation 'com.github.Colaman0:StatusLayout:1.0.8'
+	        implementation 'com.github.Colaman0:StatusLayout:1.0.9'
 	}
 ```
 
