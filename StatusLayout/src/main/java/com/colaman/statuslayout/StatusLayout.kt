@@ -3,11 +3,11 @@ package com.colaman.statuslayout
 
 import android.content.Context
 import android.support.annotation.AnimRes
-import android.support.annotation.LayoutRes
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
+import android.view.ViewGroup
 import android.widget.ViewAnimator
 import com.example.statuslayout.R
 
@@ -17,53 +17,41 @@ import com.example.statuslayout.R
  *             有STATUS_NORMAL/STATUS_LOADING等默认的几个key可以使用，正常状态的布局建议用STATUS_NORMAL作为key添加
  *             如果用自定义的key，那么需要最先添加到statuslayout中，再添加如loading，error等布局
  */
-open class StatusLayout constructor(protected var mContext: Context, attrs: AttributeSet? = null) : ViewAnimator(mContext, attrs) {
-    /**
-     * 默认的一些key，可用可不用
-     */
+open class StatusLayout constructor(private var mContext: Context, attrs: AttributeSet? = null) :
+    ViewAnimator(mContext, attrs) {
+
     companion object {
-        const val STATUS_NORMAL = "normal_content"
-        const val STATUS_LOADING = "loading_content"
-        const val STATUS_ERROR = "error_content"
-        const val STATUS_EMPTY = "empty_content"
 
         // 全局状态布局的属性值
-        val mGlobalStatusConfigs by lazy {
-            HashMap<String, StatusConfig>()
+        private val mGlobalStatusConfigs by lazy {
+            HashMap<Status, StatusConfig>()
         }
 
         // 全局的布局显示的动画
-        var mGlobalInAnimation: Int = R.anim.anim_in_alpha
-        var mGlobalOutAnimation: Int = R.anim.anim_out_alpha
-
-
-        /**
-         * 用于activity/fragment等view的初始化方式使用，在布局文件中可以不用手动把根部局替换成statuslayout,
-         * 而是调用init方法把资源res传进来，返回一个statuslayout,直接把返回的statuslayout作为activity setcontentview()方法的参数
-         *
-         * @param context   上下文
-         * @param layoutRes 布局资源文件
-         * @return
-         */
-        fun init(context: Context, @LayoutRes layoutRes: Int): StatusLayout {
-            val rootView = LayoutInflater.from(context).inflate(layoutRes, null)
-            return init(rootView)
-        }
+        var globalInAnimation: Int = R.anim.anim_in_alpha
+        var globalOutAnimation: Int = R.anim.anim_out_alpha
 
         /**
-         * 用于activity/fragment等view的初始化方式使用，在布局文件中可以不用手动把根部局替换成statuslayout,
-         * 而是调用init方法把资源res传进来，返回一个statuslayout,直接把返回的statuslayout作为activity setcontentview()方法的参数
+         * 取代view的在父布局中的位置，把view当成了[Status.Normal]布局
+         * 1.可以直接用于Activity/Fragment等，直接wrap根布局，把StatusLayout作为根布局
+         * 2.用于替换布局中某个View，方便局部替换
          *
-         * @param view 根view
-         * @return
+         * @param view View 要包裹住的View
+         * @return StatusLayout
          */
-        fun init(view: View?): StatusLayout {
-            if (view == null) {
-                throw NullPointerException("view can not be null")
-            }
+        fun wrapView(view: View): StatusLayout {
             val statusLayout = StatusLayout(view.context)
-            statusLayout.add(StatusConfig(STATUS_NORMAL, view = view))
-            statusLayout.addView(view)
+            (view.parent as ViewGroup).apply {
+                val index = indexOfChild(view)
+                removeViewAt(index)
+                addView(statusLayout, index, view.layoutParams)
+            }
+            view.layoutParams =  ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            statusLayout.addStatus(Status.Normal, StatusConfig(contentView = view))
+            statusLayout.switchLayout(Status.Normal)
             return statusLayout
         }
 
@@ -72,9 +60,9 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
          *
          * @param statusConfigs 状态属性值
          */
-        fun setGlobalData(vararg statusConfigs: StatusConfig) {
-            statusConfigs.forEach {
-                mGlobalStatusConfigs[it.status] = it
+        fun setGlobalData(statusList: MutableList<Pair<Status, StatusConfig>>) {
+            statusList.forEach {
+                mGlobalStatusConfigs[it.first] = it.second
             }
         }
 
@@ -85,14 +73,14 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
          * @param outAnimRes
          */
         fun setGlobalAnim(@AnimRes inAnimRes: Int, @AnimRes outAnimRes: Int) {
-            mGlobalInAnimation = inAnimRes
-            mGlobalOutAnimation = outAnimRes
+            globalInAnimation = inAnimRes
+            globalOutAnimation = outAnimRes
         }
     }
 
     // 状态布局集合
     private val statusConfigs by lazy {
-        HashMap<String, StatusConfig>()
+        HashMap<Status, StatusConfig>()
     }
 
     private val layoutInflater: LayoutInflater by lazy {
@@ -100,68 +88,33 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
     }
 
     // 布局点击listener
-    private var layoutClickListener: OnLayoutClickListener? = null
+    private var layoutActionListener: LayoutActionListener? = null
 
     // 当前显示view在viewgroup中的index
     var currentPosition: Int = 0
 
     // 是否使用全局设置的属性
-    protected var useGlobal = true
-
-    // 是否已经加载过全局设置属性
-    protected var inited = false
+    private var useGlobal = true
 
     // 布局显示的动画
-    var inAnimation: Int = mGlobalInAnimation
-    var outAnimation: Int = mGlobalOutAnimation
+    var inAnimation: Int = globalInAnimation
+    var outAnimation: Int = globalOutAnimation
 
-    /**
-     * 加载默认属性
-     */
-    protected fun initDefault() {
-        mGlobalStatusConfigs.forEach {
-            if (!statusConfigs.containsKey(it.key)) {
-                add(config = it.value)
-            }
-        }
+
+    init {
+        setLayoutAnimation(inAnimation, outAnimation)
     }
 
     /**
-     * 添加一种布局
+     * 添加一种布局配置
      *
      * @param config StatusConfig
      * @return
      */
-    fun add(config: StatusConfig?): StatusLayout {
-        if (config == null) {
-            throw NullPointerException("config is null")
+    fun addStatus(status: Status, config: StatusConfig?): StatusLayout {
+        config?.let {
+            statusConfigs[status] = it
         }
-        var (status, layoutRes, view, clickRes, autoClick) = config
-        if (view == null) {
-            view = layoutInflater.inflate(layoutRes, this, false)
-        }
-        /**
-         * 传入了clickRes的时候再监听，否则交给view自身去处理逻辑,并且判断是否需要自动处理点击事件，autoClick为false
-         * 的时候跳过点击事件相关处理
-         */
-        if (autoClick) {
-            var clickView: View? = view?.findViewById(clickRes)
-            if (clickView == null) {
-                clickView = view
-            }
-            clickView?.setOnClickListener(getClickListener(view!!, status))
-        }
-        val index = getViewIndexByStatus(status)
-        // 把status作为tag设置到view上
-        view?.tag = status
-        // 如果同个status已经被添加过，那先移除原本的
-        if (index >= 0) {
-            removeViewAt(index)
-            addView(view, index)
-        } else {
-            addView(view)
-        }
-        statusConfigs.put(status, config)
         return this
     }
 
@@ -170,15 +123,8 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
      *
      * @param status 布局所代表的状态
      */
-    fun switchLayout(status: String) {
-        /**
-         * 如果有全局设置，延迟到切换布局时再添加到statuslayout中
-         */
-        if (useGlobal && !inited) {
-            initDefault()
-            inited = true
-        }
-        val index = getViewIndexByStatus(status)
+    fun switchLayout(status: Status) {
+        val index = getIndexByStatusIfAbsent(status)
         if (index >= 0 && currentPosition != index) {
             displayedChild = index
             currentPosition = index
@@ -186,15 +132,83 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
     }
 
     /**
-     * 找到defaultcontent的index
+     * 根据Status返回对应Index，如果Status还没被添加过，就去查找配置map，把view添加进去再返回
+     * @param status Status
+     * @return Int Status对应的View的Index，如果没有被添加过并且配置Map里找不到则返回-1
      */
-    fun findDefaultContentIndex(): Int {
+    private fun getIndexByStatusIfAbsent(status: Status): Int {
+        var index = getViewIndexByStatus(status)
+        // 在ViewGroup里找不到对应status的时候，在configmap里寻找对应的statusConfig，然后生成配置相关View
+        if (index < 0) {
+            val config = statusConfigs.get(status)
+                ?: if (useGlobal) mGlobalStatusConfigs[status] else null
+            index = config?.run {
+                putViewByStatus(status, config)
+            } ?: -1
+        }
+        return index
+    }
+
+    /**
+     * 把配置中的View加入到布局中，并返回对应下标
+     * @param status Status 配置对应的Status
+     * @param config StatusConfig   Status配置
+     * @return Int 对应下标
+     */
+    private fun putViewByStatus(
+        status: Status,
+        config: StatusConfig
+    ): Int {
+        var index = -1
+        config.run { createView(status, config) }
+            ?.also {
+                addView(it, it.layoutParams ?: getDefaultLayoutParams())
+                index = indexOfChild(it)
+            }
+        return index
+    }
+
+    private fun getDefaultLayoutParams() = ViewGroup.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        ViewGroup.LayoutParams.MATCH_PARENT
+    )
+
+    /**
+     * 根据对应的Status和配置生成View，并设置点击事件等
+     * @param status Status
+     * @param config StatusConfig
+     * @return View?
+     */
+    private fun createView(status: Status, config: StatusConfig): View? {
+        var (layoutRes, view, clickRes, layoutAutoClick) = config
+        if (view == null) {
+            view = layoutInflater.inflate(layoutRes, this, false)
+        }
+
         /**
-         * 先寻找有没有用STAUTS_NORMAL 作为key的布局，优先级比较高，
-         * 如果没有的话则用户是用自定义的key，则默认用index=0的布局作为默认的布局，所以如果用自定义的key添加默认布局的时候需要最先添加
+         * 设置一系列点击事件，设置的View都设置了tag为status
          */
+        clickRes.forEach {
+            view?.findViewById<View>(it)?.apply {
+                setOnClickListener(getClickListener(this, status))
+                // 这里给设置了点击事件的view也设置tag
+                tag = status
+            }
+        }
+        if (layoutAutoClick) {
+            view?.setOnClickListener(getClickListener(view, status))
+        }
+        view?.tag = status
+        return view
+    }
+
+    /**
+     * 找到[Status.Normal]布局的下标
+     * @return Int
+     */
+    private fun findNormalStatusIndex(): Int {
         for (position in 0 until childCount) {
-            if (getChildAt(position).tag == STATUS_NORMAL) {
+            if (getChildAt(position).tag == Status.Normal) {
                 return position
             }
         }
@@ -206,17 +220,16 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
      */
     fun showDefaultContent() {
         /**
-         * 先寻找有没有用STAUTS_NORMAL 作为key的布局，优先级比较高，
+         * 先寻找有没有用[Status.Normal] 作为key的布局，优先级比较高，
          * 如果没有的话则用户是用自定义的key，则默认用index=0的布局作为默认的布局，所以如果用自定义的key添加默认布局的时候需要最先添加
          */
-        val index = findDefaultContentIndex()
+        val index = findNormalStatusIndex()
         if (index >= 0 && currentPosition != index) {
             displayedChild = index
             currentPosition = index
         }
     }
 
-    fun getDefaultContentView() = getChildAt(findDefaultContentIndex())
 
     /**
      * 设置是否使用全局设置的状态布局
@@ -235,7 +248,7 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
      * @param animationRes 动画资源文件
      * @return
      */
-    fun setAnimation(@AnimRes inRes: Int, @AnimRes outRes: Int): StatusLayout {
+    fun setLayoutAnimation(@AnimRes inRes: Int, @AnimRes outRes: Int): StatusLayout {
         setInAnimation(mContext, inRes)
         setOutAnimation(mContext, outRes)
         return this
@@ -248,7 +261,7 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
      * @param status 状态
      * @return
      */
-    protected fun getViewIndexByStatus(status: String?): Int {
+    private fun getViewIndexByStatus(status: Status): Int {
         for (position in 0 until childCount) {
             if (getChildAt(position).tag === status) {
                 return position
@@ -263,10 +276,10 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
      * @param status 传入监听布局的status
      * @return
      */
-    fun getClickListener(view: View, status: String?): View.OnClickListener {
+    private fun getClickListener(view: View, status: Status): OnClickListener {
         return OnClickListener {
-            if (layoutClickListener != null) {
-                layoutClickListener!!.OnLayoutClick(view, status)
+            if (layoutActionListener != null) {
+                layoutActionListener!!.onLayoutAction(status, view)
             }
         }
     }
@@ -274,22 +287,23 @@ open class StatusLayout constructor(protected var mContext: Context, attrs: Attr
     /**
      * 设置布局点击的监听
      *
-     * @param onLayoutClickListener
+     * @param layoutActionListener
      */
-    fun setLayoutClickListener(onLayoutClickListener: OnLayoutClickListener) {
-        layoutClickListener = onLayoutClickListener
+    fun setLayoutActionListener(layoutActionListener: LayoutActionListener) {
+        this.layoutActionListener = layoutActionListener
     }
+
 
     /**
      * 布局点击事件的接口
      */
-    interface OnLayoutClickListener {
+    interface LayoutActionListener {
         /**
          * 布局点击之后的回调方法
          *
          * @param view   add的时候传入的资源文件转换的view，要在回调中做操作可以通过操作view来实现
          * @param status 当前点击的布局代表的status
          */
-        fun OnLayoutClick(view: View, status: String?)
+        fun onLayoutAction(status: Status, view: View)
     }
 }

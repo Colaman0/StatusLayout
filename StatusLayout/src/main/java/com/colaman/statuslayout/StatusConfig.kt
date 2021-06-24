@@ -9,10 +9,9 @@ import android.view.View
  * Function : 状态属性
  */
 data class StatusConfig(
-        var status: String,
         @field:LayoutRes
-        var layoutRes: Int = 0,
-        var view: View? = null,
-        @field:IdRes
-        var clickRes: Int = 0,
-        var autoClcik: Boolean = true)
+        var contentLayoutRes: Int = 0,
+        var contentView: View? = null,
+        val clickRes: MutableList<Int> = mutableListOf(),
+        var autoClick: Boolean = true
+)

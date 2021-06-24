@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,9 +8,11 @@
     tools:context="com.colaman.demo.MainActivity">
 
     <LinearLayout
+        android:id="@+id/ll_action"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent">
 
         <Button
             android:id="@+id/btn_content"
@@ -36,16 +39,15 @@
             android:text="error" />
     </LinearLayout>
 
-    <com.colaman.statuslayout.StatusLayout
-        android:id="@+id/status_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="content"
-            android:textSize="20sp" />
-    </com.colaman.statuslayout.StatusLayout>
-</LinearLayout>
+    <TextView
+        android:id="@+id/tv_content"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginTop="100dp"
+        android:background="@color/colorAccent"
+        android:gravity="center"
+        android:text="content"
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@id/ll_action" />
+</android.support.constraint.ConstraintLayout>
