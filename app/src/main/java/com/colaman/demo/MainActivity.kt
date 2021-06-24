@@ -1,13 +1,9 @@
 package com.colaman.demo
 
-import android.os.AsyncTask
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.TextView
 import android.widget.Toast
 
 import com.colaman.statuslayout.StatusConfig
@@ -39,8 +35,8 @@ class MainActivity : AppCompatActivity() {
 
         // 下面的代码展示了两种add方式
         mStatusLayout!!
-                .add(StatusConfig(StatusLayout.STATUS_LOADING, view = LayoutInflater.from(this).inflate(R.layout.include_loading, null)))
-                .add(StatusConfig(StatusLayout.STATUS_ERROR, view = errorView, autoClcik = true))
+                .add(StatusConfig(StatusLayout.STATUS_LOADING, contentView = LayoutInflater.from(this).inflate(R.layout.include_loading, null)))
+                .add(StatusConfig(StatusLayout.STATUS_ERROR, contentView = errorView, autoClcik = true))
                 .setLayoutClickListener(object : StatusLayout.OnLayoutClickListener {
                     override fun OnLayoutClick(view: View, status: String?) {
                         Toast.makeText(this@MainActivity, " status = $status  is Click  ", Toast.LENGTH_SHORT).show()
