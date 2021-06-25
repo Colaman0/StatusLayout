@@ -66,10 +66,10 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
          *
          * @param statusConfigs 状态属性值
          */
-        fun setGlobalData(statusConfigs: StatusConfig) {
-//            statusConfigs.forEach {
-//                mGlobalStatusConfigs[it.status] = it
-//            }
+        fun setGlobalData(statusList: MutableList<Pair<Status, StatusConfig>>) {
+            statusList.forEach {
+                mGlobalStatusConfigs[it.first] = it.second
+            }
         }
 
         /**
@@ -94,16 +94,16 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
     }
 
     // 布局点击listener
-    private var layoutClickListener: OnLayoutClickListener? = null
+    private var layoutActionListener: LayoutActionListener? = null
 
     // 当前显示view在viewgroup中的index
     var currentPosition: Int = 0
 
     // 是否使用全局设置的属性
-    protected var useGlobal = true
+    private var useGlobal = true
 
     // 是否已经加载过全局设置属性
-    protected var inited = false
+    private var inited = false
 
     // 布局显示的动画
     var inAnimation: Int = mGlobalInAnimation
@@ -112,11 +112,11 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
     /**
      * 加载默认属性
      */
-    protected fun initDefault() {
+    private fun initDefault() {
         mGlobalStatusConfigs.forEach {
-//            if (!statusConfigs.containsKey(it.key)) {
-//                add(config = it.value)
-//            }
+            if (!statusConfigs.containsKey(it.key)) {
+                addStatus(it.key, config = it.value)
+            }
         }
     }
 
@@ -147,8 +147,8 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
         }
         if (layoutAutoClick) {
             view?.setOnClickListener(getClickListener(view, status))
-            view?.tag = status
         }
+        view?.tag = status
         val index = getViewIndexByStatus(status)
         // 如果同个status已经被添加过，那先移除原本的
         if (index >= 0) {
@@ -181,9 +181,6 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
         }
     }
 
-    /**
-     * 找到defaultcontent的index
-     */
     private fun findDefaultContentIndex(): Int {
         /**
          * 先寻找有没有用[Status.Normal]作为key的布局，优先级比较高，
@@ -260,8 +257,8 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
      */
     private fun getClickListener(view: View, status: Status): OnClickListener {
         return OnClickListener {
-            if (layoutClickListener != null) {
-                layoutClickListener!!.onLayoutAction(view, status)
+            if (layoutActionListener != null) {
+                layoutActionListener!!.onLayoutAction(status, view)
             }
         }
     }
@@ -269,22 +266,22 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
     /**
      * 设置布局点击的监听
      *
-     * @param onLayoutClickListener
+     * @param layoutActionListener
      */
-    fun setLayoutClickListener(onLayoutClickListener: OnLayoutClickListener) {
-        layoutClickListener = onLayoutClickListener
+    fun setLayoutActionListener(layoutActionListener: LayoutActionListener) {
+        this.layoutActionListener = layoutActionListener
     }
 
     /**
      * 布局点击事件的接口
      */
-    interface OnLayoutClickListener {
+    interface LayoutActionListener {
         /**
          * 布局点击之后的回调方法
          *
          * @param view   add的时候传入的资源文件转换的view，要在回调中做操作可以通过操作view来实现
          * @param status 当前点击的布局代表的status
          */
-        fun onLayoutAction(view: View, status: Status)
+        fun onLayoutAction(status: Status, view: View)
     }
 }
