@@ -8,6 +8,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
+import android.view.ViewGroup
 import android.widget.ViewAnimator
 import com.example.statuslayout.R
 
@@ -17,7 +18,8 @@ import com.example.statuslayout.R
  *             有STATUS_NORMAL/STATUS_LOADING等默认的几个key可以使用，正常状态的布局建议用STATUS_NORMAL作为key添加
  *             如果用自定义的key，那么需要最先添加到statuslayout中，再添加如loading，error等布局
  */
-open class StatusLayout constructor(private var mContext: Context, attrs: AttributeSet? = null) : ViewAnimator(mContext, attrs) {
+open class StatusLayout constructor(private var mContext: Context, attrs: AttributeSet? = null) :
+    ViewAnimator(mContext, attrs) {
 
     companion object {
 
@@ -30,34 +32,17 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
         var mGlobalInAnimation: Int = R.anim.anim_in_alpha
         var mGlobalOutAnimation: Int = R.anim.anim_out_alpha
 
-
-        /**
-         * 用于activity/fragment等view的初始化方式使用，在布局文件中可以不用手动把根部局替换成statuslayout,
-         * 而是调用init方法把资源res传进来，返回一个statuslayout,直接把返回的statuslayout作为activity setcontentview()方法的参数
-         *
-         * @param context   上下文
-         * @param layoutRes 布局资源文件
-         * @return
-         */
-        fun init(context: Context, @LayoutRes layoutRes: Int): StatusLayout {
-            val rootView = LayoutInflater.from(context).inflate(layoutRes, null)
-            return init(rootView)
-        }
-
-        /**
-         * 用于activity/fragment等view的初始化方式使用，在布局文件中可以不用手动把根部局替换成statuslayout,
-         * 而是调用init方法把资源res传进来，返回一个statuslayout,直接把返回的statuslayout作为activity setcontentview()方法的参数
-         *
-         * @param view 根view
-         * @return
-         */
-        fun init(view: View?): StatusLayout {
-            if (view == null) {
-                throw NullPointerException("view can not be null")
+        fun attachTo(view: View, status: Status = Status.Normal): StatusLayout {
+            val statusLayout = StatusLayout(view.context).apply {
+                layoutParams = view.layoutParams
             }
-            val statusLayout = StatusLayout(view.context)
-            statusLayout.addStatus(Status.Normal, StatusConfig(contentView = view))
-            statusLayout.addView(view)
+            (view.parent as ViewGroup).apply {
+                val index = indexOfChild(view)
+                removeViewAt(index)
+                addView(statusLayout, index)
+            }
+            statusLayout.addStatus(status, StatusConfig(contentView = view))
+
             return statusLayout
         }
 
@@ -271,6 +256,7 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
     fun setLayoutActionListener(layoutActionListener: LayoutActionListener) {
         this.layoutActionListener = layoutActionListener
     }
+
 
     /**
      * 布局点击事件的接口

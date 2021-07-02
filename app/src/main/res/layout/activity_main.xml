@@ -36,16 +36,12 @@
             android:text="error" />
     </LinearLayout>
 
-    <com.colaman.statuslayout.StatusLayout
-        android:id="@+id/status_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="content"
-            android:textSize="20sp" />
-    </com.colaman.statuslayout.StatusLayout>
+    <TextView
+        android:id="@+id/tv_content"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:gravity="center"
+        android:text="content"
+        android:textSize="20sp" />
 </LinearLayout>
