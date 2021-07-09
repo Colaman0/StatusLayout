@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initStatusLayout() {
-        mStatusLayout = StatusLayout.attachTo(findViewById(R.id.tv_content))
+        mStatusLayout = StatusLayout.wrapView(findViewById(R.id.tv_content))
         // 这里错误类型布局直接inflate成一个view，展示另一种添加布局的方法
         val errorView =
             LayoutInflater.from(this).inflate(R.layout.include_error, mStatusLayout, false)

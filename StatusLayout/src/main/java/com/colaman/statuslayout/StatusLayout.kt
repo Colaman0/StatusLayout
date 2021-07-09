@@ -92,16 +92,13 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
     // 是否使用全局设置的属性
     private var useGlobal = true
 
-    // 是否已经加载过全局设置属性
-    private var inited = false
-
     // 布局显示的动画
     var inAnimation: Int = globalInAnimation
     var outAnimation: Int = globalOutAnimation
 
 
     init {
-        setAnimation(inAnimation, outAnimation)
+        setLayoutAnimation(inAnimation, outAnimation)
     }
 
     /**
@@ -139,7 +136,8 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
         var index = getViewIndexByStatus(status)
         // 在ViewGroup里找不到对应status的时候，在configmap里寻找对应的statusConfig，然后生成配置相关View
         if (index < 0) {
-            val config = statusConfigs.get(status) ?: mGlobalStatusConfigs.get(status)
+            val config = statusConfigs.get(status)
+                ?: if (useGlobal) mGlobalStatusConfigs[status] else null
             index = config?.run {
                 putViewByStatus(status, config)
             } ?: -1
@@ -147,6 +145,12 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
         return index
     }
 
+    /**
+     * 把配置中的View加入到布局中，并返回对应下标
+     * @param status Status 配置对应的Status
+     * @param config StatusConfig   Status配置
+     * @return Int 对应下标
+     */
     private fun putViewByStatus(
         status: Status,
         config: StatusConfig
@@ -165,6 +169,12 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
         ViewGroup.LayoutParams.MATCH_PARENT
     )
 
+    /**
+     * 根据对应的Status和配置生成View，并设置点击事件等
+     * @param status Status
+     * @param config StatusConfig
+     * @return View?
+     */
     private fun createView(status: Status, config: StatusConfig): View? {
         var (layoutRes, view, clickRes, layoutAutoClick) = config
         if (view == null) {
@@ -172,9 +182,7 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
         }
 
         /**
-         * 传入了clickRes的时候再监听，否则交给view自身去处理逻辑,并且判断是否需要自动处理点击事件，autoClick为false
-         * 的时候跳过点击事件相关处理
-         * 把status作为tag设置到view上
+         * 设置一系列点击事件，设置的View都设置了tag为status
          */
         clickRes.forEach {
             view?.findViewById<View>(it)?.apply {
@@ -190,11 +198,11 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
         return view
     }
 
-    private fun findDefaultContentIndex(): Int {
-        /**
-         * 先寻找有没有用[Status.Normal]作为key的布局，优先级比较高，
-         * 如果没有的话则用户是用自定义的key，则默认用index=0的布局作为默认的布局，所以如果用自定义的key添加默认布局的时候需要最先添加
-         */
+    /**
+     * 找到[Status.Normal]布局的下标
+     * @return Int
+     */
+    private fun findNormalStatusIndex(): Int {
         for (position in 0 until childCount) {
             if (getChildAt(position).tag == Status.Normal) {
                 return position
@@ -211,7 +219,7 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
          * 先寻找有没有用[Status.Normal] 作为key的布局，优先级比较高，
          * 如果没有的话则用户是用自定义的key，则默认用index=0的布局作为默认的布局，所以如果用自定义的key添加默认布局的时候需要最先添加
          */
-        val index = findDefaultContentIndex()
+        val index = findNormalStatusIndex()
         if (index >= 0 && currentPosition != index) {
             displayedChild = index
             currentPosition = index
@@ -236,7 +244,7 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
      * @param animationRes 动画资源文件
      * @return
      */
-    fun setAnimation(@AnimRes inRes: Int, @AnimRes outRes: Int): StatusLayout {
+    fun setLayoutAnimation(@AnimRes inRes: Int, @AnimRes outRes: Int): StatusLayout {
         setInAnimation(mContext, inRes)
         setOutAnimation(mContext, outRes)
         return this
