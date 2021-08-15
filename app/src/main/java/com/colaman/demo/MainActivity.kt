@@ -16,7 +16,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(StatusLayout.wrapView(this, R.layout.activity_main).apply {
+            mStatusLayout = this
+        })
         initStatusLayout()
         findViewById<View>(R.id.btn_content).setOnClickListener { mStatusLayout!!.showDefaultContent() }
         findViewById<View>(R.id.btn_error).setOnClickListener { mStatusLayout!!.switchLayout(Status.Error) }
@@ -29,7 +31,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initStatusLayout() {
-        mStatusLayout = StatusLayout.wrapView(findViewById(R.id.tv_content))
         // 这里错误类型布局直接inflate成一个view，展示另一种添加布局的方法
         val errorView =
             LayoutInflater.from(this).inflate(R.layout.include_error, mStatusLayout, false)

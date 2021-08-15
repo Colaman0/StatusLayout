@@ -3,6 +3,7 @@ package com.colaman.statuslayout
 
 import android.content.Context
 import android.support.annotation.AnimRes
+import android.support.annotation.LayoutRes
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -41,12 +42,12 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
          */
         fun wrapView(view: View): StatusLayout {
             val statusLayout = StatusLayout(view.context)
-            (view.parent as ViewGroup).apply {
+            (view.parent as? ViewGroup)?.apply {
                 val index = indexOfChild(view)
                 removeViewAt(index)
                 addView(statusLayout, index, view.layoutParams)
             }
-            view.layoutParams =  ViewGroup.LayoutParams(
+            view.layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
@@ -54,6 +55,11 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
             statusLayout.switchLayout(Status.Normal)
             return statusLayout
         }
+
+        fun wrapView(context: Context, @LayoutRes layoutRes: Int): StatusLayout {
+            return wrapView(LayoutInflater.from(context).inflate(layoutRes, null))
+        }
+
 
         /**
          * 设置全局数据
