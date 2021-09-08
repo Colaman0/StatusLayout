@@ -1,7 +1,6 @@
 package com.colaman.demo
 
 import android.app.Application
-import com.colaman.statuslayout.Status
 
 import com.colaman.statuslayout.StatusConfig
 import com.colaman.statuslayout.StatusLayout
@@ -15,8 +14,11 @@ class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         // 设置全局属性
-        StatusLayout.setGlobalData(mutableListOf(
-                Pair(Status.Empty, StatusConfig(contentLayoutRes = R.layout.include_empty))))
+        StatusLayout.setGlobalData(
+            mutableListOf(
+                Pair(StatusLayout.EMPTY, StatusConfig(contentLayoutRes = R.layout.include_empty))
+            )
+        )
 
 //        // 设置全局动画
 //        StatusLayout.setGlobalAnim(R.anim.anim_in_alpha, R.anim.anim_out_alpha)

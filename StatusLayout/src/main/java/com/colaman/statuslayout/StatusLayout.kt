@@ -3,7 +3,6 @@ package com.colaman.statuslayout
 
 import android.content.Context
 import android.support.annotation.AnimRes
-import android.support.annotation.LayoutRes
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -23,9 +22,14 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
 
     companion object {
 
+        const val NORMAL = "normal"
+        const val LOADING = "loading"
+        const val EMPTY = "empty"
+        const val ERROR = "error"
+
         // 全局状态布局的属性值
         private val mGlobalStatusConfigs by lazy {
-            HashMap<Status, StatusConfig>()
+            HashMap<String, StatusConfig>()
         }
 
         // 全局的布局显示的动画
@@ -42,31 +46,22 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
          */
         fun wrapView(view: View): StatusLayout {
             val statusLayout = StatusLayout(view.context)
-            (view.parent as? ViewGroup)?.apply {
+            (view.parent as ViewGroup).apply {
                 val index = indexOfChild(view)
                 removeViewAt(index)
                 addView(statusLayout, index, view.layoutParams)
             }
-            view.layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            statusLayout.addStatus(Status.Normal, StatusConfig(contentView = view))
-            statusLayout.switchLayout(Status.Normal)
+            statusLayout.addStatus(NORMAL, StatusConfig(contentView = view))
+            statusLayout.switchLayout(NORMAL)
             return statusLayout
         }
-
-        fun wrapView(context: Context, @LayoutRes layoutRes: Int): StatusLayout {
-            return wrapView(LayoutInflater.from(context).inflate(layoutRes, null))
-        }
-
 
         /**
          * 设置全局数据
          *
          * @param statusConfigs 状态属性值
          */
-        fun setGlobalData(statusList: MutableList<Pair<Status, StatusConfig>>) {
+        fun setGlobalData(statusList: MutableList<Pair<String, StatusConfig>>) {
             statusList.forEach {
                 mGlobalStatusConfigs[it.first] = it.second
             }
@@ -86,7 +81,7 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
 
     // 状态布局集合
     private val statusConfigs by lazy {
-        HashMap<Status, StatusConfig>()
+        HashMap<String, StatusConfig>()
     }
 
     private val layoutInflater: LayoutInflater by lazy {
@@ -117,7 +112,7 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
      * @param config StatusConfig
      * @return
      */
-    fun addStatus(status: Status, config: StatusConfig?): StatusLayout {
+    fun addStatus(status: String, config: StatusConfig?): StatusLayout {
         config?.let {
             statusConfigs[status] = it
         }
@@ -129,7 +124,7 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
      *
      * @param status 布局所代表的状态
      */
-    fun switchLayout(status: Status) {
+    fun switchLayout(status: String) {
         val index = getIndexByStatusIfAbsent(status)
         if (index >= 0 && currentPosition != index) {
             displayedChild = index
@@ -142,7 +137,7 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
      * @param status Status
      * @return Int Status对应的View的Index，如果没有被添加过并且配置Map里找不到则返回-1
      */
-    private fun getIndexByStatusIfAbsent(status: Status): Int {
+    private fun getIndexByStatusIfAbsent(status: String): Int {
         var index = getViewIndexByStatus(status)
         // 在ViewGroup里找不到对应status的时候，在configmap里寻找对应的statusConfig，然后生成配置相关View
         if (index < 0) {
@@ -162,19 +157,19 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
      * @return Int 对应下标
      */
     private fun putViewByStatus(
-        status: Status,
+        status: String,
         config: StatusConfig
     ): Int {
         var index = -1
         config.run { createView(status, config) }
             ?.also {
-                addView(it, it.layoutParams ?: getDefaultLayoutParams())
+                addView(it, it.layoutParams ?: getDefaultLayout())
                 index = indexOfChild(it)
             }
         return index
     }
 
-    private fun getDefaultLayoutParams() = ViewGroup.LayoutParams(
+    private fun getDefaultLayout() = ViewGroup.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT,
         ViewGroup.LayoutParams.MATCH_PARENT
     )
@@ -185,7 +180,7 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
      * @param config StatusConfig
      * @return View?
      */
-    private fun createView(status: Status, config: StatusConfig): View? {
+    private fun createView(status: String, config: StatusConfig): View? {
         var (layoutRes, view, clickRes, layoutAutoClick) = config
         if (view == null) {
             view = layoutInflater.inflate(layoutRes, this, false)
@@ -214,7 +209,7 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
      */
     private fun findNormalStatusIndex(): Int {
         for (position in 0 until childCount) {
-            if (getChildAt(position).tag == Status.Normal) {
+            if (getChildAt(position).tag == NORMAL) {
                 return position
             }
         }
@@ -267,7 +262,7 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
      * @param status 状态
      * @return
      */
-    private fun getViewIndexByStatus(status: Status): Int {
+    private fun getViewIndexByStatus(status: String): Int {
         for (position in 0 until childCount) {
             if (getChildAt(position).tag === status) {
                 return position
@@ -282,7 +277,7 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
      * @param status 传入监听布局的status
      * @return
      */
-    private fun getClickListener(view: View, status: Status): OnClickListener {
+    private fun getClickListener(view: View, status: String): OnClickListener {
         return OnClickListener {
             if (layoutActionListener != null) {
                 layoutActionListener!!.onLayoutAction(status, view)
@@ -310,6 +305,6 @@ open class StatusLayout constructor(private var mContext: Context, attrs: Attrib
          * @param view   add的时候传入的资源文件转换的view，要在回调中做操作可以通过操作view来实现
          * @param status 当前点击的布局代表的status
          */
-        fun onLayoutAction(status: Status, view: View)
+        fun onLayoutAction(status: String, view: View)
     }
 }

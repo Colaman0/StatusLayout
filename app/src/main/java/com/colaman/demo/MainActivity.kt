@@ -16,21 +16,28 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(StatusLayout.wrapView(this, R.layout.activity_main).apply {
-            mStatusLayout = this
-        })
+        setContentView(R.layout.activity_main)
         initStatusLayout()
         findViewById<View>(R.id.btn_content).setOnClickListener { mStatusLayout!!.showDefaultContent() }
-        findViewById<View>(R.id.btn_error).setOnClickListener { mStatusLayout!!.switchLayout(Status.Error) }
-        findViewById<View>(R.id.btn_empty).setOnClickListener { mStatusLayout!!.switchLayout(Status.Empty) }
+        findViewById<View>(R.id.btn_error).setOnClickListener {
+            mStatusLayout!!.switchLayout(
+                StatusLayout.ERROR
+            )
+        }
+        findViewById<View>(R.id.btn_empty).setOnClickListener {
+            mStatusLayout!!.switchLayout(
+                StatusLayout.EMPTY
+            )
+        }
         findViewById<View>(R.id.btn_loading).setOnClickListener {
             mStatusLayout!!.switchLayout(
-                Status.Loading
+                StatusLayout.LOADING
             )
         }
     }
 
     private fun initStatusLayout() {
+        mStatusLayout = StatusLayout.wrapView(findViewById(R.id.tv_content))
         // 这里错误类型布局直接inflate成一个view，展示另一种添加布局的方法
         val errorView =
             LayoutInflater.from(this).inflate(R.layout.include_error, mStatusLayout, false)
@@ -43,15 +50,15 @@ class MainActivity : AppCompatActivity() {
         // 下面的代码展示了两种add方式
         mStatusLayout!!
             .addStatus(
-                Status.Loading,
+                StatusLayout.LOADING,
                 StatusConfig(
                     contentView = LayoutInflater.from(this).inflate(R.layout.include_loading, null),
                     autoClick = false
                 )
             )
-            .addStatus(Status.Error, StatusConfig(contentView = errorView, autoClick = true))
+            .addStatus(StatusLayout.ERROR, StatusConfig(contentView = errorView, autoClick = true))
             .setLayoutActionListener(object : StatusLayout.LayoutActionListener {
-                override fun onLayoutAction(status: Status, view: View) {
+                override fun onLayoutAction(status: String, view: View) {
                     Toast.makeText(
                         this@MainActivity,
                         " status = $status  is Click  ",
