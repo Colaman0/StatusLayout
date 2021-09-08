@@ -22,7 +22,7 @@ allprojects {
     
 ```
 dependencies {
-	implementation 'com.github.Colaman0:StatusLayout:2.0.1'
+	implementation 'com.github.Colaman0:StatusLayout:2.0.2'
 }
 ```
 
